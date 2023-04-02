@@ -7,13 +7,14 @@ export default function Register() {
             method: 'POST',
             headers: {
                 "Access-Control-Allow-Origin": "*",
-                "Content-Type": "application/json",
+                "Content-Type": "x-www-form-urlencoded",
             },
-            url: 'http://localhost:3000/api/user/register',
+            url: `/api/user/register`,
             data: { username: "hello" },
         })
         .then(res => console.log(res))
         .catch(err => console.log(err));
+
     }
 
     return (

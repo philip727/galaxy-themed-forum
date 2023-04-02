@@ -2,9 +2,7 @@ import express from 'express';
 const router = express.Router();
 import { db } from '../../index';
 const cors = require('cors');
-
 router.use(cors());
-
 // Grabs all the users user names from the list
 router.get("/getusers", (_, res) => {
     db.query("SELECT name, uid FROM users")

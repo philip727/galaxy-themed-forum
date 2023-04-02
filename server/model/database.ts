@@ -12,6 +12,7 @@ export class Database {
             this.#requestConnection()
             .then(conn => {
                 conn.query(query, (err: MysqlError, res: any) => {
+                    conn.release();
                     if (err) {
                         return reject(err);
                     }
