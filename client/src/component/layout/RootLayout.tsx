@@ -1,13 +1,18 @@
 import { Outlet } from 'react-router-dom'
+import { LoginDetails } from '../../types/user'
 import Navbar from './Navbar'
 
-export default function RootLayout() {
+type Props = {
+    userDetails: LoginDetails,
+}
+
+export default function RootLayout({ userDetails }: Props) {
     return (
         <div>
             <header>
-                <Navbar />
+                <Navbar userDetails={userDetails} />
             </header>
-            <main>
+            <main className="pt-24">
                 <Outlet />
             </main>
         </div>
