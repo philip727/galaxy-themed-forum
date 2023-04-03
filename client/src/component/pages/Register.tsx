@@ -2,6 +2,8 @@ import axios from 'axios'
 import { ChangeEvent, useRef } from 'react';
 import { API_URL } from '../../scripts/config'
 import { RegisterData } from '../../types/register';
+import InputField from '../extras/InputField';
+import ShineButton from '../extras/ShineButton';
 
 
 export default function Register() {
@@ -58,8 +60,8 @@ export default function Register() {
     }
 
     const register = () => {
-        const [isValidData, validMessage] = isRegisterDataValid(registerData.current); 
-        
+        const [isValidData, validMessage] = isRegisterDataValid(registerData.current);
+
         if (!isValidData) {
             console.log(validMessage);
             return;
@@ -78,8 +80,8 @@ export default function Register() {
                 password: registerData.current.password,
             },
         })
-        .then(res => console.log(res.data))
-        .catch(err => console.log(err));
+            .then(res => console.log(res.data))
+            .catch(err => console.log(err));
     }
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -87,12 +89,15 @@ export default function Register() {
     }
 
     return (
-        <div>
-            <form>
-                <input onChange={handleChange} type="text" name="username" required />
-                <input onChange={handleChange} type="email" name="email" required />
-                <input onChange={handleChange} type="password" name="password" required />
-                <input onChange={handleChange} type="password" name="confirmPassword" required />
+        <div className="flex justify-center mt-32">
+            <form className="bg-[var(--jet)] w-[30rem] flex flex-col items-center p-8 gap-8 deep-shadow">
+                <InputField onChange={handleChange} type="text" name="username" placeholder="Username" />
+                <InputField onChange={handleChange} type="email" name="email" placeholder="Email" />
+                <InputField onChange={handleChange} type="password" name="password" placeholder="Password" />
+                <InputField onChange={handleChange} type="password" name="confirmPassword" placeholder="Confirm Password" />
+                <ShineButton onClick={() => { register() }}>
+                    <p>Create Account</p>
+                </ShineButton>
             </form>
         </div>
     );

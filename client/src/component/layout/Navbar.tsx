@@ -1,4 +1,3 @@
-import { NavLink } from "react-router-dom";
 import { LoginDetails } from "../../types/user";
 import ShineButton from "../extras/ShineButton";
 
@@ -18,11 +17,11 @@ export default function Navbar({ userDetails }: Props) {
             <div className="w-1/3 flex justify-end items-center px-28 gap-8">
                 {!userDetails.isLoggedIn && userDetails.uid < 0 && (
                     <>
-                        <ShineButton key={1}>
-                            <NavLink to="/register" className="font-bold text-xl" >Register</NavLink>
+                        <ShineButton key={1} to="/register">
+                            <p className="font-bold text-xl" >Register</p>
                         </ShineButton>
-                        <ShineButton key={2}>
-                            <NavLink to="/login" className="font-bold text-xl">Login</NavLink>
+                        <ShineButton key={2} to="/login">
+                            <p className="font-bold text-xl">Login</p>
                         </ShineButton>
                     </>
                 )}

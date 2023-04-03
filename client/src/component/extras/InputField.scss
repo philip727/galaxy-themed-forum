@@ -1,0 +1,12 @@
+.input-field {
+    &:focus {
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+
+
+        &+span {
+            background: var(--floral-white);
+        }
+    }
+}
