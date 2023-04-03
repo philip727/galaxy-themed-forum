@@ -3,3 +3,16 @@ export type RegisterData = {
     password: string,
     email: string,
 }
+
+export type LoginData = {
+    username: string,
+    password: string,
+}
+
+export interface IUserExistData {
+    username: string,
+    uid: string,
+    password: string,
+}
+
+

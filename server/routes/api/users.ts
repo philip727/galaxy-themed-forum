@@ -2,14 +2,17 @@ import express from 'express';
 const router = express.Router();
 import { db } from '../../index';
 import { SuccessResponse } from '../../types/api';
-import { RegisterData } from '../../types/users';
+import { IUserExistData, LoginData, RegisterData } from '../../types/users';
 const cors = require('cors');
 const bodyParser = require('body-parser');
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+
 
 // Validation imports
 import { validateResponse } from '../../validation/api';
-import { validateEmail, validatePassword, validateUsername } from '../../validation/users';
+import { validateColumns, validateLoginData, validateRegisterData } from '../../validation/users';
+import { JWT_KEY } from '../../config/keys';
 
 const BCRYPT_SALT_ROUNDS = 12;
 router.use(bodyParser.urlencoded({
@@ -75,56 +78,23 @@ router.get("/getuser/:id", (req, res) => {
         );
 });
 
-// Validates the register data
-const checkRegisterData = (data: any): SuccessResponse => {
-    // Make sure the data is an object
-    if (!data || !(typeof data == "object")) {
-        return {
-            success: false,
-            response: "Failed to receive data from client, try refreshing",
-        };
-    };
 
-    // Make sure the data contains all the required properties
-    if (!("username" in data) || !("email" in data) || !("password" in data)) {
-        return {
-            success: false,
-            response: "Please fill in all required fields",
-        };
-    };
+const tryDoesUserExistByName = (username: string, columns: string[]): Promise<SuccessResponse> => {
+    return new Promise(async (resolve, reject) => {
+        await db.query(`SELECT ${columns.toString()} FROM users WHERE name LIKE \"${username}\";`)
+            .then(d => {
+                // If the array is empty, then the user does not exist
+                if (!Array.isArray(d) || d.length == 0) {
+                    return resolve({ success: false, response: "User does not exist" });
+                }
 
-
-    // Makes sure the username is ok
-    const [validUsername, usernameMessage] = validateUsername(data.username)
-    if (!validUsername) {
-        return {
-            success: false,
-            response: usernameMessage,
-        };
-    }
-
-    // Makes sure the password is ok and meets the criteria
-    const [validPassword, passwordMessage] = validatePassword(data.password);
-    if (!validPassword) {
-        return {
-            success: false,
-            response: passwordMessage
-        };
-    }
-   
-    // Makes sure the email is ok
-    const [validEmail, emailMessage] = validateEmail(data.email);
-    if (!validEmail) {
-        return {
-            success: false,
-            response: emailMessage,
-        }
-    }
-
-    return {
-        success: true,
-        response: data,
-    };
+                // If the user exists, then respond with the data
+                resolve({ success: true, response: d });
+            })
+            .catch(_ => {
+                return reject({ success: false, response: "Server Error (6)" })
+            })
+    })
 }
 
 // Checks if the user exists
@@ -169,10 +139,10 @@ const tryInsertUser = (data: RegisterData): Promise<SuccessResponse> => {
 }
 
 // Register the data
-const attemptToRegisterData = (data: any): Promise<SuccessResponse> => {
+const tryToRegisterWithData = (data: any): Promise<SuccessResponse> => {
     return new Promise(async (resolve, reject) => {
         // Checks if the data request is valid
-        const isValidData = checkRegisterData(data);
+        const isValidData = validateRegisterData(data);
         if (!isValidData.success) {
             return reject(isValidData);
         }
@@ -210,12 +180,97 @@ const attemptToRegisterData = (data: any): Promise<SuccessResponse> => {
     })
 }
 
+
+
+const tryToLoginWithData = (data: any): Promise<SuccessResponse> => {
+    return new Promise(async (resolve, reject) => {
+        // Checks if the data request is valid
+        const isValidData = validateLoginData(data);
+        if (!isValidData.success) {
+            return reject(isValidData);
+        }
+
+        data = data as LoginData
+
+        let doesUserExist = {} as SuccessResponse;
+        await tryDoesUserExistByName(data.username, ["uid", "name", "password"])
+            .then(d => doesUserExist = d)
+            .catch(err => doesUserExist = err);
+
+        if (!doesUserExist.success) {
+            return reject(doesUserExist);
+        }
+
+        if (!Array.isArray(doesUserExist.response)) {
+            return reject({
+                success: false,
+                response: "Server Error (7)",
+            })
+        }
+
+        if (doesUserExist.response.length > 1) {
+            return reject({
+                success: false,
+                response: "Server Error (8)",
+            })
+        }
+
+        if (typeof doesUserExist.response[0] !== 'object' || !validateColumns(doesUserExist.response[0], ["password", "uid", "name"])) {
+            return reject({
+                success: false,
+                response: "Server Error (9)",
+            })
+        }
+
+
+        bcrypt.compare(data.password, doesUserExist.response[0].password).then(match => {
+            // User and password matched
+            if (!match) {
+                return reject({
+                    success: false,
+                    response: "Incorrect Password",
+                })
+            }
+
+            const payload = {
+                // @ts-ignore
+                username: doesUserExist.response[0].name,
+                // @ts-ignore
+                uid: doesUserExist.response[0].uid,
+            }
+
+            jwt.sign(payload, JWT_KEY, { expiresIn: 7_890_000 }, (err, token) => {
+                if (err) {
+                    return reject({
+                        success: false,
+                        response: "Server Error (10)",
+                    })
+                }
+                return resolve({
+                    success: true,
+                    response: "Bearer " + token,
+                })
+            })
+        })
+    })
+}
+
 router.post("/register", (req, res) => {
     let data = req.body;
 
-    attemptToRegisterData(data)
+    tryToRegisterWithData(data)
         .then(d => res.send(d))
         .catch(err => res.send(err));
 })
 
+router.post("/login", (req, res) => {
+    let data = req.body;
+
+    tryToLoginWithData(data)
+        .then(d => res.send(d))
+        .catch(err => res.send(err));
+
+})
+
 module.exports = router;
+

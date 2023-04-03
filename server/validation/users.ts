@@ -1,8 +1,6 @@
-export const validateUsername = (username: string): [boolean, string] => {
-    if (username.length == 0) {
-        return [false, "Please fill in the username field"]
-    }
+import { SuccessResponse } from "../types/api"
 
+export const validateUsername = (username: string): [boolean, string] => {
     const regex = /^[a-zA-Z0-9]+$/ 
     if(!regex.test(username)) {
         return [false, "Username contains invalid characters"]
@@ -17,10 +15,6 @@ export const validateUsername = (username: string): [boolean, string] => {
 }
 
 export const validatePassword = (password: string): [boolean, string] => {
-    if (password.length == 0) {
-        return [false, "Please fill in the password field"];
-    }
-
     // Makes sure the password meets the critea of:
     // one uppercase character,
     // one common special character,
@@ -36,10 +30,6 @@ export const validatePassword = (password: string): [boolean, string] => {
 } 
 
 export const validateEmail = (email: string): [boolean, string] => {
-    if (email.length == 0) {
-        return [false, "Please fill in the email field"];
-    }
-
     // Makes sure the email is an actual valid email
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if(!regex.test(email)) {
@@ -51,4 +41,109 @@ export const validateEmail = (email: string): [boolean, string] => {
     }
 
     return [true, ""];
+}
+
+// Validates the register data
+export const validateRegisterData = (data: any): SuccessResponse => {
+    // Make sure the data is an object
+    if (!data || !(typeof data == "object")) {
+        return {
+            success: false,
+            response: "Failed to receive data from client, try refreshing",
+        };
+    };
+
+    // Make sure the data contains all the required properties
+    if (!validateColumns(data, ["username", "email", "password"])) {
+        return {
+            success: false,
+            response: "Not received all properties in data, try refreshing",
+        };
+    }
+
+    if (!validateAllFields(data)) {
+        return {
+            success: false,
+            response: "Please fill in all required fields",
+        };
+    }
+
+    // Makes sure the username is ok
+    const [validUsername, usernameMessage] = validateUsername(data.username)
+    if (!validUsername) {
+        return {
+            success: false,
+            response: usernameMessage,
+        };
+    }
+
+    // Makes sure the password is ok and meets the criteria
+    const [validPassword, passwordMessage] = validatePassword(data.password);
+    if (!validPassword) {
+        return {
+            success: false,
+            response: passwordMessage
+        };
+    }
+   
+    // Makes sure the email is ok
+    const [validEmail, emailMessage] = validateEmail(data.email);
+    if (!validEmail) {
+        return {
+            success: false,
+            response: emailMessage,
+        }
+    }
+
+    return {
+        success: true,
+        response: data,
+    };
+}
+
+export const validateAllFields = (data: object): boolean => {
+    for (const [_, value] of Object.entries(data)) {
+        if (value.length == 0) return false;
+    }
+
+    return true;
+}
+export const validateLoginData = (data: any): SuccessResponse => { // Make sure the data is an object 
+    if (!data || !(typeof data == "object")) {
+        return {
+            success: false,
+            response: "Failed to receive data from client, try refreshing",
+        };
+    }
+
+    // Make sure the data contains all the required properties
+    if (!validateColumns(data, ["username", "password"])) {
+        return {
+            success: false,
+            response: "Not received all properties in data, try refreshing",
+        }
+    }
+
+    if (!validateAllFields(data)) {
+        return {
+            success: false,
+            response: "Please fill in all required fields",
+        };
+    }
+    
+    return {
+        success: true,
+        response: data,
+    }
+}
+
+export const validateColumns = (data: object, columns: string[]): boolean => {
+    let isOk = true;
+    columns.forEach(column => {
+        if (!(column in data)) {
+            isOk = false;
+        }
+    })
+
+    return isOk;
 }

@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { ChangeEvent, useRef } from 'react';
 import { API_URL } from '../../scripts/config'
-import { RegisterData } from '../../types/register';
+import { RegisterData } from '../../types/user';
 import InputField from '../extras/InputField';
 import ShineButton from '../extras/ShineButton';
 
@@ -15,8 +15,8 @@ export default function Register() {
     });
 
     const isRegisterDataValid = (regData: RegisterData): [boolean, string] => {
-        for (const field in regData) {
-            if (field.length == 0) return [false, "Please fill in all fields"];
+        for (const [_, entry] of Object.entries(regData)) {
+            if (entry.length == 0) return [false, "Please fill in all fields"];
         }
 
         // Makes sure the username is valid
