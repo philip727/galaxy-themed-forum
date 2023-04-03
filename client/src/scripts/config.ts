@@ -1,1 +1,1 @@
-export const empty = 20
+export const API_URL = 'http://localhost:3100'
