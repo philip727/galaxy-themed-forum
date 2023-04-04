@@ -22,7 +22,7 @@ export const validatePassword = (password: string): [boolean, string] => {
     // one number,
     // one lowercase character,
     // and is at least 8 characters
-    const regex = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8,}$/;
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+~\-=?<>[\]{}|\\\/]).{8,}$/;
     if(!regex.test(password)) {
         return [false, "This password does not meet the criteria"];
     }

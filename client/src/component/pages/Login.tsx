@@ -1,15 +1,16 @@
 import axios from 'axios'
-import { ChangeEvent, Dispatch, SetStateAction, useRef } from "react";
+import { ChangeEvent, useRef } from "react";
 import { updateAuthItemsWithJWTCookie } from '../../scripts/auth/login';
 import { API_URL } from '../../scripts/config';
-import { DetailsToLogin, LoginDetails } from "../../types/user";
+import { DetailsToLogin } from "../../types/user";
 import InputField from "../extras/InputField"
 import ShineButton from "../extras/ShineButton"
 import jwtDecode from 'jwt-decode'
 import { IJWTInfo } from '../../types/auth';
+import { createModal, destroyModal } from '../../scripts/layout/modalManager';
 
 type Props = {
-    setUser: Dispatch<SetStateAction<IJWTInfo>> 
+    setUser: (i: IJWTInfo) => void;
 }
 
 export default function Login({ setUser }: Props) {
@@ -17,20 +18,44 @@ export default function Login({ setUser }: Props) {
         username: "",
         password: "",
     });
-    
+
     // Logs in with the jwt
     const jwtLogin = (jwt: string) => {
         // Verifies the jwt with the server
         updateAuthItemsWithJWTCookie(jwt, true)
             .then(data => {
-                const [success, jwt] = data;   
+                const [success, response] = data;
                 if (!success) {
-                    return; 
+                    // Creates a prompt if with the error message
+                    createModal({
+                        header: "Login",
+                        subtext: response,
+                        buttons: [
+                            {
+                                text: "Ok",
+                                fn: destroyModal,
+                            }
+                        ]
+                    })
+                    return;
                 }
 
-                const userdetails = jwtDecode(jwt);
-                
-                setUser(userdetails as IJWTInfo);
+                const userdetails = jwtDecode(response) as IJWTInfo;
+
+                setUser(userdetails);
+            })
+            .catch(err => {
+                // Creates a prompt if with the error message
+                createModal({
+                    header: "Login",
+                    subtext: err,
+                    buttons: [
+                        {
+                            text: "Ok",
+                            fn: destroyModal,
+                        }
+                    ]
+                })
             })
     }
 
@@ -48,10 +73,21 @@ export default function Login({ setUser }: Props) {
             },
         })
             .then(res => {
+                const data = res.data;
                 if (!res.data.success) {
-                    console.log(res.data.response);
+                    // Creates a prompt if with the error message
+                    createModal({
+                        header: "Login",
+                        subtext: res.data.response,
+                        buttons: [
+                            {
+                                text: "Ok",
+                                fn: destroyModal,
+                            }
+                        ]
+                    })
                 }
-                
+
                 jwtLogin(res.data.response);
             })
             .catch(err => console.log(err));

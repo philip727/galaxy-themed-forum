@@ -1,8 +1,7 @@
 import axios from "axios";
-import { IJWTInfo } from "../../types/auth";
-import jwtDecode from 'jwt-decode';
 import { API_URL, LOGIN_COOKIE_NAME } from "../config";
 import { setAuthTokenHeader } from "./headers";
+
 
 export const updateAuthItemsWithJWTCookie = (jwt: string, setCookie?: boolean): Promise<[boolean, string]> => {
     return new Promise(async (resolve, reject) => {
