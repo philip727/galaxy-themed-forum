@@ -1,9 +1,10 @@
 import { Outlet } from 'react-router-dom'
+import { IJWTInfo } from '../../types/auth'
 import { LoginDetails } from '../../types/user'
 import Navbar from './Navbar'
 
 type Props = {
-    userDetails: LoginDetails,
+    userDetails: IJWTInfo,
 }
 
 export default function RootLayout({ userDetails }: Props) {

@@ -12,12 +12,12 @@ export interface LoginDetails extends IPublicUserDetails {
     isLoggedIn: Boolean,
 } 
 
-export interface RegisterData extends IUserDetails {
+export interface IDetailsToRegister extends IUserDetails {
     password: string,
     confirmPassword: string,
 }
 
-export type LoginData = {
+export type DetailsToLogin = {
     username: string,
     password: string,
 }

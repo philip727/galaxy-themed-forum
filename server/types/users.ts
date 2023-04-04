@@ -9,7 +9,7 @@ export type LoginData = {
     password: string,
 }
 
-export interface IUserExistData {
+export interface IDataFromExistingUser {
     username: string,
     uid: string,
     password: string,

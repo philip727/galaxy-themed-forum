@@ -1,8 +1,9 @@
+import { IJWTInfo } from "../../types/auth";
 import { LoginDetails } from "../../types/user";
 import ShineButton from "../extras/ShineButton";
 
 type Props = {
-    userDetails: LoginDetails,
+    userDetails: IJWTInfo,
 }
 
 export default function Navbar({ userDetails }: Props) {
@@ -15,7 +16,7 @@ export default function Navbar({ userDetails }: Props) {
                 <h1 className="text-center text-4xl font-extrabold"><span className="text-[var(--blue-violet)]">GALAXY</span>FORUMS</h1>
             </div>
             <div className="w-1/3 flex justify-end items-center px-28 gap-8">
-                {!userDetails.isLoggedIn && userDetails.uid < 0 && (
+                {userDetails.username.length == 0 && userDetails.uid < 0 && (
                     <>
                         <ShineButton key={1} to="/register">
                             <p className="font-bold text-xl" >Register</p>

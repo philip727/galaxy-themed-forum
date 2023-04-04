@@ -1,13 +1,13 @@
-import { IAuthenticationState, IJWTInfo } from "../types/auth"
+import { IAuthenticationState, IJWTInfo } from "../../types/auth"
 
 enum Action {
     SET_CURRENT_USER,
     UPDATE_CURRENT_USER,
 }
 
-export const authenticationState = {
+const authenticationState = {
     isAuthenticated: false,
-    user: {},
+    user: {} as IJWTInfo,
 }
 
 export const authAction = (state = authenticationState, action: Action, data: IJWTInfo): IAuthenticationState => {

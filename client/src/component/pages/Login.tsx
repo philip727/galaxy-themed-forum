@@ -1,16 +1,38 @@
 import axios from 'axios'
-import jwtDecode from 'jwt-decode';
-import { ChangeEvent, useRef } from "react";
+import { ChangeEvent, Dispatch, SetStateAction, useRef } from "react";
+import { updateAuthItemsWithJWTCookie } from '../../scripts/auth/login';
 import { API_URL } from '../../scripts/config';
-import { LoginData } from "../../types/user";
+import { DetailsToLogin, LoginDetails } from "../../types/user";
 import InputField from "../extras/InputField"
 import ShineButton from "../extras/ShineButton"
+import jwtDecode from 'jwt-decode'
+import { IJWTInfo } from '../../types/auth';
 
-export default function Login() {
-    const loginData = useRef<LoginData>({
+type Props = {
+    setUser: Dispatch<SetStateAction<IJWTInfo>> 
+}
+
+export default function Login({ setUser }: Props) {
+    const loginData = useRef<DetailsToLogin>({
         username: "",
         password: "",
     });
+    
+    // Logs in with the jwt
+    const jwtLogin = (jwt: string) => {
+        // Verifies the jwt with the server
+        updateAuthItemsWithJWTCookie(jwt, true)
+            .then(data => {
+                const [success, jwt] = data;   
+                if (!success) {
+                    return; 
+                }
+
+                const userdetails = jwtDecode(jwt);
+                
+                setUser(userdetails as IJWTInfo);
+            })
+    }
 
     const login = () => {
         axios.request({
@@ -26,15 +48,11 @@ export default function Login() {
             },
         })
             .then(res => {
-                if(!res.data.success) {
+                if (!res.data.success) {
                     console.log(res.data.response);
                 }
                 
-                localStorage.setItem("login-token", res.data.response);
-
-                const decoded = jwtDecode(res.data.response);
-
-                console.log(decoded);
+                jwtLogin(res.data.response);
             })
             .catch(err => console.log(err));
     }

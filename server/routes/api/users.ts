@@ -2,17 +2,20 @@ import express from 'express';
 const router = express.Router();
 import { db } from '../../index';
 import { SuccessResponse } from '../../types/api';
-import { IUserExistData, LoginData, RegisterData } from '../../types/users';
+import { IDataFromExistingUser, LoginData, RegisterData } from '../../types/users';
+
+// POST stuff 
 const cors = require('cors');
 const bodyParser = require('body-parser');
+
+// Encryption Imports
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-
+import { JWT_KEY } from '../../config/keys';
 
 // Validation imports
-import { validateResponse } from '../../validation/api';
-import { validateColumns, validateLoginData, validateRegisterData } from '../../validation/users';
-import { JWT_KEY } from '../../config/keys';
+import { validateResponse, validateKeys } from '../../validation/api';
+import { validateLoginData, validateRegisterData } from '../../validation/users';
 
 const BCRYPT_SALT_ROUNDS = 12;
 router.use(bodyParser.urlencoded({
@@ -215,7 +218,7 @@ const tryToLoginWithData = (data: any): Promise<SuccessResponse> => {
             })
         }
 
-        if (typeof doesUserExist.response[0] !== 'object' || !validateColumns(doesUserExist.response[0], ["password", "uid", "name"])) {
+        if (typeof doesUserExist.response[0] !== 'object' || !validateKeys(doesUserExist.response[0], ["password", "uid", "name"])) {
             return reject({
                 success: false,
                 response: "Server Error (9)",
@@ -272,5 +275,4 @@ router.post("/login", (req, res) => {
 
 })
 
-module.exports = router;
-
+export default router;

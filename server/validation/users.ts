@@ -1,4 +1,5 @@
 import { SuccessResponse } from "../types/api"
+import { validateAllFields, validateKeys } from "./api"
 
 export const validateUsername = (username: string): [boolean, string] => {
     const regex = /^[a-zA-Z0-9]+$/ 
@@ -54,7 +55,7 @@ export const validateRegisterData = (data: any): SuccessResponse => {
     };
 
     // Make sure the data contains all the required properties
-    if (!validateColumns(data, ["username", "email", "password"])) {
+    if (!validateKeys(data, ["username", "email", "password"])) {
         return {
             success: false,
             response: "Not received all properties in data, try refreshing",
@@ -101,13 +102,6 @@ export const validateRegisterData = (data: any): SuccessResponse => {
     };
 }
 
-export const validateAllFields = (data: object): boolean => {
-    for (const [_, value] of Object.entries(data)) {
-        if (value.length == 0) return false;
-    }
-
-    return true;
-}
 export const validateLoginData = (data: any): SuccessResponse => { // Make sure the data is an object 
     if (!data || !(typeof data == "object")) {
         return {
@@ -117,7 +111,7 @@ export const validateLoginData = (data: any): SuccessResponse => { // Make sure 
     }
 
     // Make sure the data contains all the required properties
-    if (!validateColumns(data, ["username", "password"])) {
+    if (!validateKeys(data, ["username", "password"])) {
         return {
             success: false,
             response: "Not received all properties in data, try refreshing",
@@ -137,13 +131,3 @@ export const validateLoginData = (data: any): SuccessResponse => { // Make sure 
     }
 }
 
-export const validateColumns = (data: object, columns: string[]): boolean => {
-    let isOk = true;
-    columns.forEach(column => {
-        if (!(column in data)) {
-            isOk = false;
-        }
-    })
-
-    return isOk;
-}
