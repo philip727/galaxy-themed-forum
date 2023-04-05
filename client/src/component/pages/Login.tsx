@@ -9,9 +9,20 @@ import jwtDecode from 'jwt-decode'
 import { IJWTInfo } from '../../types/auth';
 import { createModal, destroyModal } from '../../scripts/layout/modalManager';
 import { createNotification } from '../../scripts/layout/notificationManager';
+import Container from '../layout/blocks/Container';
+import { motion } from 'framer-motion';
 
 type Props = {
     setUser: (i: IJWTInfo) => void;
+}
+
+const animationVariants = {
+    hide: {
+        opacity: 0,
+    },
+    show: {
+        opacity: 1,
+    },
 }
 
 export default function Login({ setUser }: Props) {
@@ -68,7 +79,7 @@ export default function Login({ setUser }: Props) {
         // Everything is also checked on serverside anyway.
         if (!isValidData) {
             createNotification({
-                text: validMessage, 
+                text: validMessage,
             });
             return;
         }
@@ -111,14 +122,27 @@ export default function Login({ setUser }: Props) {
     }
 
     return (
-        <div className="flex justify-center mt-32">
-            <form className="bg-[var(--jet)] w-[30rem] flex flex-col items-center p-8 gap-8 deep-shadow">
-                <InputField onChange={handleChange} type="text" name="username" placeholder="Username" />
-                <InputField onChange={handleChange} type="password" name="password" placeholder="Password" />
-                <ShineButton onClick={() => { login() }}>
-                    <p>Login</p>
-                </ShineButton>
-            </form>
-        </div>
+        <motion.div
+            variants={animationVariants}
+            initial="hide"
+            animate="show"
+            transition={{ duration: 0.3 }}
+            className="flex flex-col justify-center items-center mt-20"
+        >
+            <h1 className="text-5xl font-extrabold">Login</h1>
+            <div
+                className="flex justify-center mt-12"
+            >
+                <Container>
+                    <div className="w-full h-full flex flex-col justify-center gap-8 items-center p-8">
+                        <InputField onChange={handleChange} type="text" name="username" placeholder="Username" />
+                        <InputField onChange={handleChange} type="password" name="password" placeholder="Password" />
+                        <ShineButton onClick={() => { login() }}>
+                            <p>Login</p>
+                        </ShineButton>
+                    </div>
+                </Container>
+            </div>
+        </motion.div>
     )
 }

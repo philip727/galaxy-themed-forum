@@ -26,13 +26,12 @@ router.use(cors());
 
 // Grabs all the users user names from the list
 router.get("/getusers", (_, res) => {
-    db.query("SELECT name, uid FROM users")
+    db.query("SELECT name, uid, role FROM users")
         .then(data =>
-            res.send(
-                {
-                    success: true,
-                    response: data
-                })
+            res.send({
+                success: true,
+                response: data
+            })
         )
         .catch(_ =>
             res.send({
@@ -95,7 +94,7 @@ const tryDoesUserExistByName = (username: string, columns: string[]): Promise<Su
                 resolve({ success: true, response: d });
             })
             .catch(_ => {
-                return reject({ success: false, response: "Server Error (6)" })
+                return reject({ success: false, response: "Server Error (R-06)" })
             })
     })
 }
@@ -115,7 +114,7 @@ const tryDoesUserExist = (data: RegisterData): Promise<SuccessResponse> => {
                 resolve({ success: true, response: data });
             })
             .catch(_ => {
-                return reject({ success: false, response: "Server Error (5)" });
+                return reject({ success: false, response: "Server Error (R-07)" });
             })
     })
 }
@@ -125,10 +124,10 @@ const tryInsertUser = (data: RegisterData): Promise<SuccessResponse> => {
     return new Promise((resolve, reject) => {
         bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS, async (err, hash) => {
             if (err) {
-                return reject({ success: false, response: "Server Error (4)" });
+                return reject({ success: false, response: "Server Error (R-04)" });
             }
             // Inserts into DB with hashed password
-            await db.query(`INSERT INTO users (name, email, password) VALUES (\"${data.username}\", \"${data.email}\", \"${hash}\")`)
+            await db.query(`INSERT INTO users (name, email, password, role) VALUES (\"${data.username}\", \"${data.email}\", \"${hash}\", \"user\")`)
                 .then(_ => {
                     console.log(`New registered user ${data.username} / ${hash} / ${data.email}`);
 
@@ -157,10 +156,12 @@ const tryToRegisterWithData = (data: any): Promise<SuccessResponse> => {
             .then(d => doesUserExist = d)
             .catch(err => doesUserExist = err);
 
+        // Makes sure the response has the right values
         if (!validateResponse(doesUserExist)) {
-            return reject({ success: false, response: "Server Error (2)" });
+            return reject({ success: false, response: "Server Error (R-03)" });
         }
 
+        // If the user exist request was a failure, then return respond to user
         if (!doesUserExist.success) {
             return reject(doesUserExist);
         }
@@ -171,10 +172,12 @@ const tryToRegisterWithData = (data: any): Promise<SuccessResponse> => {
             .then(d => insertUser = d)
             .catch(err => insertUser = err);
 
+        // Makes sure the response has the right values
         if (!validateResponse(insertUser)) {
-            return reject({ success: false, response: "Server Error (3)" });
+            return reject({ success: false, response: "Server Error (R-02)" });
         }
 
+        // If it fails to insert the user, then throw the request
         if (!insertUser.success) {
             return reject(insertUser);
         }
@@ -185,6 +188,7 @@ const tryToRegisterWithData = (data: any): Promise<SuccessResponse> => {
 
 
 
+// Attempt to login
 const tryToLoginWithData = (data: any): Promise<SuccessResponse> => {
     return new Promise(async (resolve, reject) => {
         // Checks if the data request is valid
@@ -277,7 +281,6 @@ router.post("/login", (req, res) => {
     tryToLoginWithData(data)
         .then(d => res.send(d))
         .catch(err => res.send(err));
-
 })
 
 export default router;

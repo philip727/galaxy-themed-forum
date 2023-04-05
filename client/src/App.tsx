@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom'
 import RootLayout from './component/layout/RootLayout';
-import Home from './component/pages/Home';
+import Home from './component/pages/Home/Home';
 import Login from './component/pages/Login';
 import Register from './component/pages/Register';
 import './App.scss'
