@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ChangeEvent, useRef } from "react";
+import { ChangeEvent, useEffect, useRef } from "react";
 import { isLoginDataValid, updateAuthItemsWithJWTCookie } from '../../scripts/auth/login';
 import { API_URL } from '../../scripts/config';
 import { IDetailsToLogin } from "../../types/user";
@@ -7,13 +7,16 @@ import InputField from "../extras/InputField"
 import ShineButton from "../extras/ShineButton"
 import jwtDecode from 'jwt-decode'
 import { IJWTInfo } from '../../types/auth';
-import { createModal, destroyModal } from '../../scripts/layout/modalManager';
+import { createModal } from '../../scripts/layout/modalManager';
 import { createNotification } from '../../scripts/layout/notificationManager';
 import Container from '../layout/blocks/Container';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { ModalFunctionTypes } from '../../types/layout';
 
 type Props = {
-    setUser: (i: IJWTInfo) => void;
+    setUser: (i: IJWTInfo) => void,
+    userDetails: IJWTInfo,
 }
 
 const animationVariants = {
@@ -25,7 +28,8 @@ const animationVariants = {
     },
 }
 
-export default function Login({ setUser }: Props) {
+export default function Login({ setUser, userDetails }: Props) {
+    const navigate = useNavigate();
     const loginData = useRef<IDetailsToLogin>({
         username: "",
         password: "",
@@ -45,16 +49,16 @@ export default function Login({ setUser }: Props) {
                         buttons: [
                             {
                                 text: "Ok",
-                                fn: destroyModal,
+                                fn: ModalFunctionTypes.CLOSE,
                             }
                         ]
                     })
                     return;
                 }
 
-                const userdetails = jwtDecode(response) as IJWTInfo;
+                const userDetails = jwtDecode(response) as IJWTInfo;
 
-                setUser(userdetails);
+                setUser(userDetails);
             })
             .catch(err => {
                 // Creates a prompt if with the error message
@@ -64,12 +68,20 @@ export default function Login({ setUser }: Props) {
                     buttons: [
                         {
                             text: "Ok",
-                            fn: destroyModal,
+                            fn: ModalFunctionTypes.CLOSE,
                         }
                     ]
                 })
             })
     }
+
+    // Makes sure the user goes back to home page if already logged in
+    useEffect(() => {
+        if (userDetails.username.length > 0 && userDetails.uid > 0) {
+            navigate("/");
+        }
+    }, [userDetails])
+
 
     const login = () => {
         // Client side checks
@@ -106,7 +118,7 @@ export default function Login({ setUser }: Props) {
                         buttons: [
                             {
                                 text: "Ok",
-                                fn: destroyModal,
+                                fn: ModalFunctionTypes.CLOSE,
                             }
                         ]
                     })

@@ -1,7 +1,11 @@
 export type ModalDetails = {
     header: string,
     subtext: string,
-    buttons: [{text: string, fn: () => void}]
+    buttons: {text: string, fn: ModalFunctionTypes | (() => void) }[]
+}
+
+export enum ModalFunctionTypes {
+    CLOSE = 100,
 }
 
 export interface INotificationDetails {
@@ -12,3 +16,4 @@ export interface INotificationDetails {
 export interface INotificationDetailsWithID extends INotificationDetails {
     id: string;
 }
+

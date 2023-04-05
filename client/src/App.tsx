@@ -11,6 +11,8 @@ import { deleteJWTCookie, updateAuthItemsWithJWTCookie } from './scripts/auth/lo
 import jwtDecode from 'jwt-decode';
 import { setAuthTokenHeader } from './scripts/auth/headers';
 import { createNotification } from './scripts/layout/notificationManager';
+import { createModal } from './scripts/layout/modalManager';
+import { ModalFunctionTypes } from './types/layout';
 
 
 function App() {
@@ -21,8 +23,8 @@ function App() {
         exp: 0,
     })
 
-    const updateUser = (userJWT: IJWTInfo) => {         
-        setUser(userJWT)
+    const updateUser = (userDetails: IJWTInfo) => {
+        setUser(userDetails);
     }
 
     const clearUser = () => {
@@ -41,27 +43,31 @@ function App() {
         // Verifies the jwt with the server
         updateAuthItemsWithJWTCookie(jwt)
             .then(data => {
-                const [success, jwt] = data;   
+                const [success, jwt] = data;
                 if (!success) {
-                    return; 
+                    return;
                 }
 
                 // Decodes the jwt to use the information
                 const userDetails = jwtDecode(jwt) as IJWTInfo;
-                
+
                 // If it's been X time then delete the cookie
                 const currentTime = Date.now() / 1000;
                 if (userDetails.exp < currentTime) {
                     deleteJWTCookie();
                     return;
                 }
-                
-                setUser(userDetails);
+
+                updateUser(userDetails);
             })
             .catch(err => {
-                createNotification({
-                    text: err,
-                    seconds: 10,
+                createModal({
+                    header: "Session Verification",
+                    subtext: err,
+                    buttons: [{
+                        text: "Ok",
+                        fn: ModalFunctionTypes.CLOSE
+                    }]
                 })
             })
     }
@@ -74,10 +80,8 @@ function App() {
         }
 
         const token = localStorage[LOGIN_COOKIE_NAME];
-        
-        jwtLogin(token);
 
-        console.log('i fire once');
+        jwtLogin(token);
     }, [])
 
     return (
@@ -86,8 +90,8 @@ function App() {
                 createRoutesFromElements(
                     <Route path="/" element={<RootLayout userDetails={user} clearUser={clearUser} />}>
                         <Route index element={<Home />} />
-                        <Route path="/register" element={<Register />} />
-                        <Route path="/login" element={<Login setUser={updateUser} />} />
+                        <Route path="/register" element={<Register userDetails={user} />} />
+                        <Route path="/login" element={<Login setUser={updateUser} userDetails={user} />} />
                     </Route>
                 )
             )}

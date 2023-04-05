@@ -1,5 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { createModal, destroyModal } from "../../scripts/layout/modalManager";
 import { IJWTInfo } from "../../types/auth";
+import { ModalFunctionTypes } from "../../types/layout";
 import ShineButton from "../extras/ShineButton";
 
 type Props = {
@@ -9,6 +11,26 @@ type Props = {
 
 export default function Navbar({ userDetails, clearUser }: Props) {
     const navigate = useNavigate();
+    
+    const logoutUser = () => {
+        createModal({
+            header: "Logout",
+            subtext: "Are you sure you would like to logout?",
+            buttons: [
+            {
+                text: "Yes",
+                fn: () => {
+                    clearUser()
+                    destroyModal();
+                },
+            }, 
+            {
+                text: "No",
+                fn: ModalFunctionTypes.CLOSE 
+            }]
+        })
+    }
+    
     return (
         <div className="deep-shadow h-20 bg-[var(--jet)] flex justify-center items-center z-[999] absolute w-screen">
             <div className="w-1/3">
@@ -40,7 +62,7 @@ export default function Navbar({ userDetails, clearUser }: Props) {
                     </>
                 )}
                 {userDetails.username.length > 0 && userDetails.uid >= 0 && (
-                    <ShineButton onClick={clearUser}>
+                    <ShineButton onClick={logoutUser}>
                         <p className="font-bold text-xl">Logout</p>
                     </ShineButton>
                 )}

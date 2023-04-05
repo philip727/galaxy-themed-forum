@@ -1,11 +1,12 @@
 import axios from 'axios'
 import { motion } from 'framer-motion';
-import { ChangeEvent, useRef } from 'react';
+import { ChangeEvent, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isRegisterDataValid } from '../../scripts/auth/register';
 import { API_URL } from '../../scripts/config'
 import { createModal, destroyModal } from '../../scripts/layout/modalManager';
 import { createNotification } from '../../scripts/layout/notificationManager';
+import { IJWTInfo } from '../../types/auth';
 import { IDetailsToRegister } from '../../types/user';
 import InputField from '../extras/InputField';
 import ShineButton from '../extras/ShineButton';
@@ -21,7 +22,12 @@ const animationVariants = {
     }
 }
 
-export default function Register() {
+type Props = {
+    userDetails: IJWTInfo,
+}
+
+
+export default function Register({ userDetails }: Props) {
     const navigate = useNavigate();
     const registerData = useRef<IDetailsToRegister>({
         username: "",
@@ -95,6 +101,13 @@ export default function Register() {
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         registerData.current = { ...registerData.current, [event.target.name]: event.target.value };
     }
+
+    // Makes sure the user goes back to home page if already logged in
+    useEffect(() => {
+        if (userDetails.username.length > 0 && userDetails.uid > 0) {
+            navigate("/");
+        }
+    }, [userDetails])
 
     return (
         <motion.div
