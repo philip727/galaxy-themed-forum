@@ -196,6 +196,7 @@ const tryToLoginWithData = (data: any): Promise<SuccessResponse> => {
         data = data as LoginData
 
         let doesUserExist = {} as SuccessResponse;
+        // Checks if the user exists and returns uid, name and password in respond
         await tryDoesUserExistByName(data.username, ["uid", "name", "password"])
             .then(d => doesUserExist = d)
             .catch(err => doesUserExist = err);
@@ -204,24 +205,27 @@ const tryToLoginWithData = (data: any): Promise<SuccessResponse> => {
             return reject(doesUserExist);
         }
 
+        // If it's not an array, then this is an SQL bug Lol
         if (!Array.isArray(doesUserExist.response)) {
             return reject({
                 success: false,
-                response: "Server Error (7)",
+                response: "Server Error (L-01)",
             })
         }
 
+        // If there is more than one user with the same name, this is a BIG problem
         if (doesUserExist.response.length > 1) {
             return reject({
                 success: false,
-                response: "Server Error (8)",
+                response: "Server Error (L-02)",
             })
         }
 
+        // Makes sure the user columns exist
         if (typeof doesUserExist.response[0] !== 'object' || !validateKeys(doesUserExist.response[0], ["password", "uid", "name"])) {
             return reject({
                 success: false,
-                response: "Server Error (9)",
+                response: "Server Error (L-03)",
             })
         }
 
@@ -242,11 +246,12 @@ const tryToLoginWithData = (data: any): Promise<SuccessResponse> => {
                 uid: doesUserExist.response[0].uid,
             }
 
+            // Creates a jwt token that expires in 3 months with uid and username
             jwt.sign(payload, JWT_KEY, { expiresIn: 7_890_000 }, (err, token) => {
                 if (err) {
                     return reject({
                         success: false,
-                        response: "Server Error (10)",
+                        response: "Server Error (L-04)",
                     })
                 }
                 return resolve({

@@ -1,7 +1,7 @@
 export interface IUserDetails {
     username: string,
     email: string,
-} 
+}
 
 export interface IPublicUserDetails {
     username: string,
@@ -10,14 +10,14 @@ export interface IPublicUserDetails {
 
 export interface LoginDetails extends IPublicUserDetails {
     isLoggedIn: Boolean,
-} 
+}
 
 export interface IDetailsToRegister extends IUserDetails {
     password: string,
     confirmPassword: string,
 }
 
-export type DetailsToLogin = {
+export interface IDetailsToLogin {
     username: string,
     password: string,
 }

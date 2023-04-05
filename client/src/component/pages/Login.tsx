@@ -1,20 +1,21 @@
 import axios from 'axios'
 import { ChangeEvent, useRef } from "react";
-import { updateAuthItemsWithJWTCookie } from '../../scripts/auth/login';
+import { isLoginDataValid, updateAuthItemsWithJWTCookie } from '../../scripts/auth/login';
 import { API_URL } from '../../scripts/config';
-import { DetailsToLogin } from "../../types/user";
+import { IDetailsToLogin } from "../../types/user";
 import InputField from "../extras/InputField"
 import ShineButton from "../extras/ShineButton"
 import jwtDecode from 'jwt-decode'
 import { IJWTInfo } from '../../types/auth';
 import { createModal, destroyModal } from '../../scripts/layout/modalManager';
+import { createNotification } from '../../scripts/layout/notificationManager';
 
 type Props = {
     setUser: (i: IJWTInfo) => void;
 }
 
 export default function Login({ setUser }: Props) {
-    const loginData = useRef<DetailsToLogin>({
+    const loginData = useRef<IDetailsToLogin>({
         username: "",
         password: "",
     });
@@ -60,6 +61,18 @@ export default function Login({ setUser }: Props) {
     }
 
     const login = () => {
+        // Client side checks
+        const [isValidData, validMessage] = isLoginDataValid(loginData.current);
+
+        // If the data is not valid to make a request, then we error.
+        // Everything is also checked on serverside anyway.
+        if (!isValidData) {
+            createNotification({
+                text: validMessage, 
+            });
+            return;
+        }
+
         axios.request({
             method: 'POST',
             headers: {
@@ -78,7 +91,7 @@ export default function Login({ setUser }: Props) {
                     // Creates a prompt if with the error message
                     createModal({
                         header: "Login",
-                        subtext: res.data.response,
+                        subtext: data.response,
                         buttons: [
                             {
                                 text: "Ok",
@@ -88,7 +101,7 @@ export default function Login({ setUser }: Props) {
                     })
                 }
 
-                jwtLogin(res.data.response);
+                jwtLogin(data.response);
             })
             .catch(err => console.log(err));
     }

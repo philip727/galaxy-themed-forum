@@ -9,6 +9,8 @@ import { IJWTInfo } from './types/auth';
 import { LOGIN_COOKIE_NAME } from './scripts/config';
 import { deleteJWTCookie, updateAuthItemsWithJWTCookie } from './scripts/auth/login';
 import jwtDecode from 'jwt-decode';
+import { setAuthTokenHeader } from './scripts/auth/headers';
+import { createNotification } from './scripts/layout/notificationManager';
 
 
 function App() {
@@ -23,6 +25,17 @@ function App() {
         setUser(userJWT)
     }
 
+    const clearUser = () => {
+        setUser({
+            username: "",
+            uid: -1,
+            iat: 0,
+            exp: 0,
+        })
+        setAuthTokenHeader();
+        deleteJWTCookie();
+    }
+
     // Logs in with the jwt
     const jwtLogin = (jwt: string) => {
         // Verifies the jwt with the server
@@ -33,24 +46,29 @@ function App() {
                     return; 
                 }
 
-                const userdetails = jwtDecode(jwt) as IJWTInfo;
+                // Decodes the jwt to use the information
+                const userDetails = jwtDecode(jwt) as IJWTInfo;
                 
                 // If it's been X time then delete the cookie
                 const currentTime = Date.now() / 1000;
-                if (userdetails.exp < currentTime) {
+                if (userDetails.exp < currentTime) {
                     deleteJWTCookie();
                     return;
                 }
                 
-                setUser(userdetails);
+                setUser(userDetails);
             })
             .catch(err => {
-                console.log(err);
+                createNotification({
+                    text: err,
+                    seconds: 10,
+                })
             })
     }
 
 
     useEffect(() => {
+        // Ensures the jwt cookie is valid
         if (!localStorage[LOGIN_COOKIE_NAME]) {
             return;
         }
@@ -58,13 +76,15 @@ function App() {
         const token = localStorage[LOGIN_COOKIE_NAME];
         
         jwtLogin(token);
+
+        console.log('i fire once');
     }, [])
 
     return (
         <RouterProvider router={
             createBrowserRouter(
                 createRoutesFromElements(
-                    <Route path="/" element={<RootLayout userDetails={user} />}>
+                    <Route path="/" element={<RootLayout userDetails={user} clearUser={clearUser} />}>
                         <Route index element={<Home />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/login" element={<Login setUser={updateUser} />} />

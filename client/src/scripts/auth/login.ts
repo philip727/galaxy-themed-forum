@@ -1,4 +1,5 @@
 import axios from "axios";
+import { IDetailsToLogin } from "../../types/user";
 import { API_URL, LOGIN_COOKIE_NAME } from "../config";
 import { setAuthTokenHeader } from "./headers";
 
@@ -57,4 +58,12 @@ export const deleteJWTCookie = () => {
     if (localStorage[LOGIN_COOKIE_NAME]) {
         localStorage.removeItem(LOGIN_COOKIE_NAME);
     }
+}
+
+export const isLoginDataValid = (loginData: IDetailsToLogin): [boolean, string] => {
+    for (const [_, entry] of Object.entries(loginData)) {
+        if (entry.length == 0) return [false, "Please fill in all required fields"];
+    }
+
+    return [true, ""];
 }
