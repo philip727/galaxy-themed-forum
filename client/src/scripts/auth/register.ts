@@ -2,7 +2,7 @@ import { IDetailsToRegister } from "../../types/user";
 
 export const isRegisterDataValid = (regData: IDetailsToRegister): [boolean, string] => {
     for (const [_, entry] of Object.entries(regData)) {
-        if (entry.length == 0) return [false, "Please fill in all required fields"];
+        if (entry.length === 0) return [false, "Please fill in all required fields"];
     }
 
     // Makes sure the username is valid

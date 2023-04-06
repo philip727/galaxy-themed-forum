@@ -1,7 +1,6 @@
 import axios from 'axios'
 import { ChangeEvent, useEffect, useRef } from "react";
 import { isLoginDataValid, updateAuthItemsWithJWTCookie } from '../../scripts/auth/login';
-import { API_URL } from '../../scripts/config';
 import { IDetailsToLogin } from "../../types/user";
 import InputField from "../extras/InputField"
 import ShineButton from "../extras/ShineButton"
@@ -75,14 +74,6 @@ export default function Login({ setUser, userDetails }: Props) {
             })
     }
 
-    // Makes sure the user goes back to home page if already logged in
-    useEffect(() => {
-        if (userDetails.username.length > 0 && userDetails.uid > 0) {
-            navigate("/");
-        }
-    }, [userDetails])
-
-
     const login = () => {
         // Client side checks
         const [isValidData, validMessage] = isLoginDataValid(loginData.current);
@@ -102,7 +93,7 @@ export default function Login({ setUser, userDetails }: Props) {
                 "Access-Control-Allow-Origin": "*",
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            url: `${API_URL}/api/user/login`,
+            url: "/api/user/login",
             data: {
                 username: loginData.current.username,
                 password: loginData.current.password,
@@ -132,6 +123,13 @@ export default function Login({ setUser, userDetails }: Props) {
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         loginData.current = { ...loginData.current, [event.target.name]: event.target.value };
     }
+    
+    // Makes sure the user goes back to home page if already logged in
+    useEffect(() => {
+        if (userDetails.username.length > 0 && userDetails.uid > 0) {
+            navigate("/");
+        }
+    }, [userDetails])
 
     return (
         <motion.div

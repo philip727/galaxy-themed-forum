@@ -7,6 +7,14 @@ type Props = {
     destroyModal: () => void,
 }
 
+const modalAnimations = {
+    hide: {
+        opacity: 0,
+    },
+    show: {
+        opacity: 1,
+    }
+}
 
 export default function Modal({ modalDetails, destroyModal }: Props) {
     const onButtonPress = (fn: ModalFunctionTypes | (() => void)) => {
@@ -22,9 +30,14 @@ export default function Modal({ modalDetails, destroyModal }: Props) {
         }
     }
 
-
     return (
-        <motion.div className="h-fit w-[34rem] bg-[var(--jet)] flex flex-col justify-start items-center pb-4">
+        <motion.div
+            className="h-fit w-[34rem] bg-[var(--jet)] flex flex-col justify-start items-center pb-4"
+            variants={modalAnimations}
+            initial="hide"
+            animate="show"
+            transition={{duration: 0.3}}
+        >
             <span className="h-[2px] w-full bg-[var(--blue-violet)]" />
             <div className="w-full flex justify-center items-center mt-2">
                 <div className="w-1/3" />

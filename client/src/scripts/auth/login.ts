@@ -1,6 +1,6 @@
 import axios from "axios";
 import { IDetailsToLogin } from "../../types/user";
-import { API_URL, LOGIN_COOKIE_NAME } from "../config";
+import { LOGIN_COOKIE_NAME } from "../config";
 import { setAuthTokenHeader } from "./headers";
 
 
@@ -24,7 +24,7 @@ export const updateAuthItemsWithJWTCookie = (jwt: string, setCookie?: boolean): 
             .catch(err => {
                 deleteJWTCookie();
                 setAuthTokenHeader();
-                return reject([false, err])
+                return reject([false, err]);
             })
     })
 }
@@ -37,7 +37,7 @@ export const verifyJWTCookie = (jwt: string): Promise<[boolean, string]> => {
                 "Access-Control-Allow-Origin": "*",
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            url: `${API_URL}/api/auth/verifylogin`,
+            url: "/api/auth/verifylogin",
             data: {
                 jwt: jwt,
             },
@@ -62,7 +62,7 @@ export const deleteJWTCookie = () => {
 
 export const isLoginDataValid = (loginData: IDetailsToLogin): [boolean, string] => {
     for (const [_, entry] of Object.entries(loginData)) {
-        if (entry.length == 0) return [false, "Please fill in all required fields"];
+        if (entry.length === 0) return [false, "Please fill in all required fields"];
     }
 
     return [true, ""];

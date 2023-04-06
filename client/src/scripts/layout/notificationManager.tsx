@@ -21,7 +21,7 @@ export const createNotification = (notificationDetails: INotificationDetails) =>
 }
 
 export const destroyNotificationByID = (id: string) => {
-    const notification = notifications.find(x => x.id == id);
+    const notification = notifications.find(x => x.id === id);
     if (!notification) {
         return;
     }

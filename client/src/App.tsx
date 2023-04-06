@@ -1,19 +1,22 @@
+// React & Styling
 import { useEffect, useState } from 'react';
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom'
-import RootLayout from './component/layout/RootLayout';
-import Home from './component/pages/Home/Home';
-import Login from './component/pages/Login';
-import Register from './component/pages/Register';
 import './App.scss'
+
+// JWT & Authentication
 import { IJWTInfo } from './types/auth';
 import { LOGIN_COOKIE_NAME } from './scripts/config';
 import { deleteJWTCookie, updateAuthItemsWithJWTCookie } from './scripts/auth/login';
 import jwtDecode from 'jwt-decode';
 import { setAuthTokenHeader } from './scripts/auth/headers';
-import { createNotification } from './scripts/layout/notificationManager';
+
+// Components
+import RootLayout from './component/layout/RootLayout';
+import Home from './component/pages/Home/Home';
+import Login from './component/pages/Login';
+import Register from './component/pages/Register';
 import { createModal } from './scripts/layout/modalManager';
 import { ModalFunctionTypes } from './types/layout';
-
 
 function App() {
     const [user, setUser] = useState<IJWTInfo>({
@@ -71,7 +74,6 @@ function App() {
                 })
             })
     }
-
 
     useEffect(() => {
         // Ensures the jwt cookie is valid
