@@ -34,8 +34,6 @@ router.post('/verifylogin', (req, res) => {
         success: false,
         response: err,
     }))
-
-    console.log("ben");
 })
 
 

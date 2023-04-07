@@ -16,3 +16,9 @@ export interface INotificationDetails {
 export interface INotificationDetailsWithID extends INotificationDetails {
     id: string;
 }
+
+export interface ICategoryDetails {
+    CID: number,
+    name: string,
+    description: string,
+}

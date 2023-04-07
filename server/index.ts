@@ -2,6 +2,7 @@ import { Database } from './model/database'
 import express from 'express';
 import user from './routes/api/users';
 import auth from './routes/api/auth';
+import posts from './routes/api/posts';
 
 const HOST = "localhost";
 const USER = "root";
@@ -15,5 +16,6 @@ export const db = new Database(HOST, USER, PASSWORD, DB_NAME, DB_PORT);
 
 app.use("/api/user/", user);
 app.use("/api/auth/", auth);
+app.use("/api/posts/", posts);
 
 app.listen(EXPRESS_PORT, () => console.log(`Started server on port ${EXPRESS_PORT}`));
