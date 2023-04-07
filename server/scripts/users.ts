@@ -10,7 +10,7 @@ export const tryCheckIfUserDoesNotExistByName = (username: string, columns: stri
             .then(result => {
                 // If the array is empty, then the user does not exist
                 if (!Array.isArray(result) || result.length == 0) {
-                    return resolve("");
+                    return resolve("User does not exist");
                 }
 
                 return reject({ response: result });
@@ -25,7 +25,7 @@ export const tryCheckIfUserDoesNotExistByEmail = (email: string, columns: string
             .then(result => {
                 // If the array is empty, then the user does not exist
                 if (!Array.isArray(result) || result.length == 0) {
-                    return resolve("");
+                    return resolve("User does not exist");
                 }
 
                 return reject({ response: result });
@@ -58,7 +58,7 @@ export const tryCheckIfUserExistsByName = (username: string, columns: string[]):
             .then(result => {
                 // If the array is empty, then the user does not exist
                 if (!Array.isArray(result) || result.length == 0) {
-                    return reject("");
+                    return reject("User does not exist");
                 }
 
                 if (Array.length > 1) {

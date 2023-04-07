@@ -1,6 +1,6 @@
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import { ChangeEvent, useEffect, useRef } from "react";
-import { isLoginDataValid, updateAuthItemsWithJWTCookie } from '../../scripts/auth/login';
+import { isLoginDataValid, updateAuthItemsWithJWTToken } from '../../scripts/auth/login';
 import { IDetailsToLogin } from "../../types/user";
 import InputField from "../extras/InputField"
 import ShineButton from "../extras/ShineButton"
@@ -12,6 +12,7 @@ import Container from '../layout/blocks/Container';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ModalFunctionTypes } from '../../types/layout';
+import handlePromise from '../../scripts/promiseHandler';
 
 type Props = {
     setUser: (i: IJWTInfo) => void,
@@ -34,47 +35,31 @@ export default function Login({ setUser, userDetails }: Props) {
         password: "",
     });
 
-    // Logs in with the jwt
-    const jwtLogin = (jwt: string) => {
+    // Logs in with the jwt token
+    const jwtLogin = async (jwt: string) => {
         // Verifies the jwt with the server
-        updateAuthItemsWithJWTCookie(jwt, true)
-            .then(data => {
-                const [success, response] = data;
-                if (!success) {
-                    // Creates a prompt if with the error message
-                    createModal({
-                        header: "Login",
-                        subtext: response,
-                        buttons: [
-                            {
-                                text: "Ok",
-                                fn: ModalFunctionTypes.CLOSE,
-                            }
-                        ]
-                    })
-                    return;
-                }
-
-                const userDetails = jwtDecode(response) as IJWTInfo;
-
-                setUser(userDetails);
+        const [err, res] = await handlePromise<string>(updateAuthItemsWithJWTToken(jwt, true));
+        if (err) {
+            // Creates a prompt with the error message
+            createModal({
+                header: "Login",
+                subtext: err,
+                buttons: [
+                    {
+                        text: "Ok",
+                        fn: ModalFunctionTypes.CLOSE,
+                    }
+                ]
             })
-            .catch(err => {
-                // Creates a prompt if with the error message
-                createModal({
-                    header: "Login",
-                    subtext: err,
-                    buttons: [
-                        {
-                            text: "Ok",
-                            fn: ModalFunctionTypes.CLOSE,
-                        }
-                    ]
-                })
-            })
+            return;
+        }
+
+        const userDetails = jwtDecode(res as string) as IJWTInfo;
+
+        setUser(userDetails);
     }
 
-    const login = () => {
+    const login = async () => {
         // Client side checks
         const [isValidData, validMessage] = isLoginDataValid(loginData.current);
 
@@ -87,43 +72,37 @@ export default function Login({ setUser, userDetails }: Props) {
             return;
         }
 
-        axios.request({
-            method: 'POST',
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            url: "/api/user/login",
-            data: {
-                username: loginData.current.username,
-                password: loginData.current.password,
-            },
-        })
-            .then(res => {
-                const data = res.data;
-                if (!res.data.success) {
-                    // Creates a prompt if with the error message
-                    createModal({
-                        header: "Login",
-                        subtext: data.response,
-                        buttons: [
-                            {
-                                text: "Ok",
-                                fn: ModalFunctionTypes.CLOSE,
-                            }
-                        ]
-                    })
-                }
+        // Requests to login with the login data, will return a jwt so we can login on the client
+        const [err, res] = await handlePromise<AxiosResponse<any, any>>(loginRequest(loginData.current.username, loginData.current.password));
+        if (err) {
+            console.log(err);
+            return;
+        }
+        
+        const data = res?.data;
 
-                jwtLogin(data.response);
+        if (!data.success) {
+            // Creates a prompt if with the error message
+            createModal({
+                header: "Login",
+                subtext: data.response,
+                buttons: [
+                    {
+                        text: "Ok",
+                        fn: ModalFunctionTypes.CLOSE,
+                    }
+                ]
             })
-            .catch(err => console.log(err));
+            return;
+        }
+
+        jwtLogin(data.response);
     }
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         loginData.current = { ...loginData.current, [event.target.name]: event.target.value };
     }
-    
+
     // Makes sure the user goes back to home page if already logged in
     useEffect(() => {
         if (userDetails.username.length > 0 && userDetails.uid > 0) {
@@ -155,4 +134,20 @@ export default function Login({ setUser, userDetails }: Props) {
             </div>
         </motion.div>
     )
+}
+
+const loginRequest = (username: string, password: string) => {
+    return axios.request({
+        method: 'POST',
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        url: "/api/user/login",
+        data: {
+            username: username,
+            password: password,
+        },
+    })
+
 }

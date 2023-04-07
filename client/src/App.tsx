@@ -5,8 +5,8 @@ import './App.scss'
 
 // JWT & Authentication
 import { IJWTInfo } from './types/auth';
-import { LOGIN_COOKIE_NAME } from './scripts/config';
-import { deleteJWTCookie, updateAuthItemsWithJWTCookie } from './scripts/auth/login';
+import { LOGIN_COOKIE_TOKEN as LOGIN_TOKEN_NAME } from './scripts/config';
+import { deleteJWTCookie, updateAuthItemsWithJWTToken as updateAuthItemsWithJWTToken } from './scripts/auth/login';
 import jwtDecode from 'jwt-decode';
 import { setAuthTokenHeader } from './scripts/auth/headers';
 
@@ -17,6 +17,7 @@ import Login from './component/pages/Login';
 import Register from './component/pages/Register';
 import { createModal } from './scripts/layout/modalManager';
 import { ModalFunctionTypes } from './types/layout';
+import handlePromise from './scripts/promiseHandler';
 
 function App() {
     const [user, setUser] = useState<IJWTInfo>({
@@ -42,46 +43,43 @@ function App() {
     }
 
     // Logs in with the jwt
-    const jwtLogin = (jwt: string) => {
+    const jwtLogin = async (jwt: string) => {
         // Verifies the jwt with the server
-        updateAuthItemsWithJWTCookie(jwt)
-            .then(data => {
-                const [success, jwt] = data;
-                if (!success) {
-                    return;
-                }
-
-                // Decodes the jwt to use the information
-                const userDetails = jwtDecode(jwt) as IJWTInfo;
-
-                // If it's been X time then delete the cookie
-                const currentTime = Date.now() / 1000;
-                if (userDetails.exp < currentTime) {
-                    deleteJWTCookie();
-                    return;
-                }
-
-                updateUser(userDetails);
-            })
-            .catch(err => {
-                createModal({
-                    header: "Session Verification",
-                    subtext: err,
-                    buttons: [{
+        const [err, res] = await handlePromise<string>(updateAuthItemsWithJWTToken(jwt));
+        if (err) {
+            // Creates a prompt if with the error message
+            createModal({
+                header: "Login",
+                subtext: err,
+                buttons: [
+                    {
                         text: "Ok",
-                        fn: ModalFunctionTypes.CLOSE
-                    }]
-                })
+                        fn: ModalFunctionTypes.CLOSE,
+                    }
+                ]
             })
-    }
-
-    useEffect(() => {
-        // Ensures the jwt cookie is valid
-        if (!localStorage[LOGIN_COOKIE_NAME]) {
             return;
         }
 
-        const token = localStorage[LOGIN_COOKIE_NAME];
+        const userDetails = jwtDecode(res as string) as IJWTInfo;
+
+        // If it's been X time then delete the cookie
+        const currentTime = Date.now() / 1000;
+        if (userDetails.exp < currentTime) {
+            deleteJWTCookie();
+            return;
+        }
+
+        updateUser(userDetails);
+    }
+
+    useEffect(() => {
+        // Ensures the localstorage has a login token
+        if (!localStorage[LOGIN_TOKEN_NAME]) {
+            return;
+        }
+
+        const token = localStorage[LOGIN_TOKEN_NAME];
 
         jwtLogin(token);
     }, [])

@@ -1,62 +1,69 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { IDetailsToLogin } from "../../types/user";
-import { LOGIN_COOKIE_NAME } from "../config";
+import { LOGIN_COOKIE_TOKEN } from "../config";
+import handlePromise from "../promiseHandler";
 import { setAuthTokenHeader } from "./headers";
 
 
-export const updateAuthItemsWithJWTCookie = (jwt: string, setCookie?: boolean): Promise<[boolean, string]> => {
-    return new Promise((resolve, reject) => {
-        verifyJWTCookie(jwt)
-            .then(data => {
-                const [success, response] = data;
-                if (!success) {
-                    return reject([false, response])
-                }
+// Updates the auth items using the jwt
+export const updateAuthItemsWithJWTToken = (jwt: string, setCookie?: boolean): Promise<string> => {
+    return new Promise(async (resolve, reject) => {
+        const [err, res] = await handlePromise<string>(verifyJWTToken(jwt));
 
-                if (setCookie) {
-                    localStorage.setItem(LOGIN_COOKIE_NAME, response);
-                }
+        if (err) {
+            deleteJWTCookie();
+            setAuthTokenHeader();
+            return reject(err);
+        }
 
-                setAuthTokenHeader(response);
+        const verifiedJWT = res as string;
 
-                return resolve([true, response])
-            })
-            .catch(err => {
-                deleteJWTCookie();
-                setAuthTokenHeader();
-                return reject([false, err]);
-            })
+        if (setCookie) {
+            localStorage.setItem(LOGIN_COOKIE_TOKEN, verifiedJWT);
+        }
+
+        setAuthTokenHeader(verifiedJWT);
+
+        return resolve(verifiedJWT)
     })
 }
 
-export const verifyJWTCookie = (jwt: string): Promise<[boolean, string]> => {
-    return new Promise((resolve, reject) => {
-        axios.request({
-            method: "POST",
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            url: "/api/auth/verifylogin",
-            data: {
-                jwt: jwt,
-            },
-        })
-            .then(res => {
-                if (!res.data.success) {
-                    return reject([false, res.data.response])
-                }
+// Verifies the JWT Token with the server side
+export const verifyJWTToken = (jwt: string): Promise<string> => {
+    return new Promise(async (resolve, reject) => {
+        const [err, res] = await handlePromise<AxiosResponse<any, any>>(requestVerifyLogin(jwt));
+        if (err) {
+            return reject("Server Error (CVJC)");
+        }
 
-                return resolve([true, res.data.response])
-            })
-            .catch(_ => reject("Server Error (CVJC)"))
+        const data = res?.data;
+
+        if (!data.success) {
+            return reject(data.response);
+        }
+
+        return resolve(data.response);
     })
 
+}
+
+const requestVerifyLogin = (jwt: string) => {
+    return axios.request({
+        method: "POST",
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        url: "/api/auth/verifylogin",
+        data: {
+            jwt: jwt,
+        },
+    })
 }
 
 export const deleteJWTCookie = () => {
-    if (localStorage[LOGIN_COOKIE_NAME]) {
-        localStorage.removeItem(LOGIN_COOKIE_NAME);
+    if (localStorage[LOGIN_COOKIE_TOKEN]) {
+        localStorage.removeItem(LOGIN_COOKIE_TOKEN);
     }
 }
 

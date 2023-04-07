@@ -152,7 +152,6 @@ router.post("/login", async (req, res) => {
 
     let [err, userData] = await handlePromise<IQueryData | string>(tryCheckIfUserExistsByName(data.username, ["name", "uid", "password"]));
     if (err) {
-        console.log("here");
         return res.send({
             success: false,
             response: "User does not exist, check your username or register with us"

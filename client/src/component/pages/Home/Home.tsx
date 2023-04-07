@@ -1,30 +1,32 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
+import handlePromise from "../../../scripts/promiseHandler";
 import { ICategoryDetails } from "../../../types/layout";
 import Container from "../../layout/blocks/Container";
 
 export default function Home() {
     const [categories, setCategories] = useState<ICategoryDetails[] | null>(null);
-
-    // There is a good reason why I dont use loaders
-    useEffect(() => {
-        if (categories) {
+    
+    const updateCategories = async () => {
+        const [err, res] = await handlePromise<AxiosResponse<any, any>>(requestCategories());
+        if (err) {
             return;
         }
-        requestCategories()
-            .then(response => {
-                const data = response.data;
-                if (!data.success) {
-                    return;
-                }
 
-                const receivedCategories = data.response;
-                setCategories(receivedCategories);
-            })
-            .catch(err => {
+        const data = res?.data;
+        if (!data.success) {
+            return;
+        }
 
-            })
+        // Sets the state of the categories to the ones we have received from the api 
+        const receivedCategories = data.response;
+        setCategories(receivedCategories);
+    }
 
+    
+    // There is a good reason why I dont use loaders
+    useEffect(() => {
+        updateCategories(); 
     }, [])
 
     return (
@@ -51,11 +53,8 @@ export default function Home() {
 }
 
 const requestCategories = async () => {
-    const res = axios.request({
+    return axios.request({
         url: "/api/posts/getcategories",
         method: "GET",
     })
-
-
-    return res;
 }
