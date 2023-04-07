@@ -49,7 +49,7 @@ export const verifyJWTCookie = (jwt: string): Promise<[boolean, string]> => {
 
                 return resolve([true, res.data.response])
             })
-            .catch(_ => reject("Server Error (R-13)"))
+            .catch(_ => reject("Server Error (CVJC)"))
     })
 
 }

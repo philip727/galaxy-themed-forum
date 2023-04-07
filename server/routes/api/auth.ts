@@ -6,10 +6,9 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 // JWT
-import jwt from 'jsonwebtoken'
-import { JWT_KEY } from '../../config/keys';
-import { IJWTVerifiedTokenData } from '../../types/auth';
+import { IJWTToken } from '../../types/auth';
 import { verifyReceivedJWT } from '../../validation/auth';
+import { verifyJWTToken } from '../../scripts/auth';
 
 
 router.use(bodyParser.urlencoded({
@@ -25,22 +24,18 @@ router.post('/verifylogin', (req, res) => {
             response: "Failed to verify session token",
         })
     }
-    const data = req.body as IJWTVerifiedTokenData;
+    const data = req.body as IJWTToken;
+    verifyJWTToken(data.jwt)
+    .then(result => res.send({
+        success: true,
+        response: result,
+    }))
+    .catch(err => res.send({
+        success: false,
+        response: err,
+    }))
 
-    try {
-        const jwtToken = data.jwt.split("Bearer ")[1];
-        const verified = jwt.verify(jwtToken, JWT_KEY)
-
-        res.send({
-            success: true,
-            response: data.jwt,
-        });
-    } catch (_) {
-        res.send({
-            success: false,
-            response: "Failed to verify session token",
-        })
-    }
+    console.log("ben");
 })
 
 

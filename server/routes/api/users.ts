@@ -17,6 +17,7 @@ import { validateKeys } from '../../validation/api';
 import { validateLoginData, validateRegisterData } from '../../validation/users';
 import { tryCheckIfUserDoesNotExistByName, tryCheckIfUserDoesNotExistByEmail, tryCreateNewUser, tryCheckIfUserExistsByName } from '../../scripts/users';
 import handlePromise from '../../scripts/promiseHandler';
+import { createJWTFromPayload } from '../../scripts/auth';
 
 router.use(bodyParser.urlencoded({
     extended: true
@@ -186,19 +187,15 @@ router.post("/login", async (req, res) => {
             uid: userData.response.uid,
         }
 
-        // Creates a jwt token that expires in 3 months with uid and username
-        jwt.sign(payload, JWT_KEY, { expiresIn: 7_890_000 }, (err, token) => {
-            if (err) {
-                return res.send({
-                    success: false,
-                    response: "Server Error (L-04)",
-                })
-            }
-            return res.send({
-                success: true,
-                response: "Bearer " + token,
-            })
-        })
+        createJWTFromPayload(payload)
+        .then(token => res.send({
+            success: true,
+            response: token,
+        }))
+        .catch(err => res.send({
+            success: false,
+            response: err
+        }));
     })
 })
 
