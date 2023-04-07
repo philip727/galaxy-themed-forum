@@ -16,4 +16,3 @@ export interface INotificationDetails {
 export interface INotificationDetailsWithID extends INotificationDetails {
     id: string;
 }
-

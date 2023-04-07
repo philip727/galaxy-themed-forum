@@ -50,7 +50,7 @@ export default function Notification({ details }: Props) {
             clearTimeout(fadeAwayTimeoutId);
             // @ts-ignore
         }, (details.seconds * 1000) - 200);
-    }, []);
+    });
 
     return (
         <motion.div

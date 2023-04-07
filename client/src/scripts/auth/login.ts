@@ -5,8 +5,8 @@ import { setAuthTokenHeader } from "./headers";
 
 
 export const updateAuthItemsWithJWTCookie = (jwt: string, setCookie?: boolean): Promise<[boolean, string]> => {
-    return new Promise(async (resolve, reject) => {
-        await verifyJWTCookie(jwt)
+    return new Promise((resolve, reject) => {
+        verifyJWTCookie(jwt)
             .then(data => {
                 const [success, response] = data;
                 if (!success) {
@@ -30,7 +30,7 @@ export const updateAuthItemsWithJWTCookie = (jwt: string, setCookie?: boolean): 
 }
 
 export const verifyJWTCookie = (jwt: string): Promise<[boolean, string]> => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         axios.request({
             method: "POST",
             headers: {
@@ -49,7 +49,7 @@ export const verifyJWTCookie = (jwt: string): Promise<[boolean, string]> => {
 
                 return resolve([true, res.data.response])
             })
-            .catch(_ => reject("Server Error (13)"))
+            .catch(_ => reject("Server Error (R-13)"))
     })
 
 }

@@ -84,7 +84,7 @@ function App() {
         const token = localStorage[LOGIN_COOKIE_NAME];
 
         jwtLogin(token);
-    }, [])
+    })
 
     return (
         <RouterProvider router={
