@@ -1,8 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import { db } from '../../index';
-import { SuccessResponse } from '../../types/api';
-import { IDataFromExistingUser, LoginData, RegisterData } from '../../types/users';
+import { IQueryData, LoginData, RegisterData } from '../../types/users';
 
 // POST stuff 
 const cors = require('cors');
@@ -14,10 +13,11 @@ import jwt from 'jsonwebtoken'
 import { JWT_KEY } from '../../config/keys';
 
 // Validation imports
-import { validateResponse, validateKeys } from '../../validation/api';
+import { validateKeys } from '../../validation/api';
 import { validateLoginData, validateRegisterData } from '../../validation/users';
+import { tryCheckIfUserDoesNotExistByName, tryCheckIfUserDoesNotExistByEmail, tryCreateNewUser, tryCheckIfUserExistsByName } from '../../scripts/users';
+import handlePromise from '../../scripts/promiseHandler';
 
-const BCRYPT_SALT_ROUNDS = 12;
 router.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -80,207 +80,126 @@ router.get("/getuser/:id", (req, res) => {
         );
 });
 
+router.post("/register", async (req, res) => {
+    let data = req.body;
 
-const tryDoesUserExistByName = (username: string, columns: string[]): Promise<SuccessResponse> => {
-    return new Promise(async (resolve, reject) => {
-        await db.query(`SELECT ${columns.toString()} FROM users WHERE name LIKE \"${username}\";`)
-            .then(d => {
-                // If the array is empty, then the user does not exist
-                if (!Array.isArray(d) || d.length == 0) {
-                    return resolve({ success: false, response: "User does not exist" });
-                }
+    const [success, message] = validateRegisterData(data);
+    if (!success) {
+        return res.send({
+            success: false,
+            response: message,
+        })
+    }
+    data = data as RegisterData; // Cast here because if it gets through the first function, it must be register data and LSP completions lol 
 
-                // If the user exists, then respond with the data
-                resolve({ success: true, response: d });
+    // Checks if the username isn't already taken
+    let [err, _] = await handlePromise<IQueryData | string>(tryCheckIfUserDoesNotExistByName(data.username, ["uid"]))
+    if (err) {
+        if (typeof err === "object") {
+            return res.send({
+                success: false,
+                response: "Username is already taken",
             })
-            .catch(_ => {
-                return reject({ success: false, response: "Server Error (R-06)" })
+        }
+
+        return res.send({
+            success: false,
+            response: err,
+        })
+    }
+
+    // Checks if the email isn't already taken
+    [err, _] = await handlePromise<IQueryData | string>(tryCheckIfUserDoesNotExistByEmail(data.email, ["uid"]))
+    if (err) {
+        if (typeof err === "object") {
+            return res.send({
+                success: false,
+                response: "Email is already taken",
             })
+        }
+
+        return res.send({
+            success: false,
+            response: err,
+        })
+    }
+
+    // Tries to create the new user
+    [err, _] = await handlePromise<IQueryData | string>(tryCreateNewUser(data))
+    if (err) {
+        return res.send({
+            success: false,
+            response: err,
+        })
+    }
+
+    res.send({
+        success: true,
+        response: "Succesfully Registered",
     })
-}
+})
 
-// Checks if the user exists
-const tryDoesUserExist = (data: RegisterData): Promise<SuccessResponse> => {
-    return new Promise(async (resolve, reject) => {
-        // Checks if the user already exists by checking the username and email
-        await db.query(`SELECT * FROM users WHERE email LIKE \"${data.email}\" OR name LIKE \"${data.username}\";`)
-            .then(d => {
-                // If the array is longer than 0 then we have gotten a result and the user exists
-                if (Array.isArray(d) && d.length > 0) {
-                    return reject({ success: false, response: "User already exists" });
-                }
+router.post("/login", async (req, res) => {
+    let data = req.body;
 
-                // If the array isn't longer than 0, then the user doesn't exist
-                resolve({ success: true, response: data });
-            })
-            .catch(_ => {
-                return reject({ success: false, response: "Server Error (R-07)" });
-            })
-    })
-}
-
-// Insert user into table
-const tryInsertUser = (data: RegisterData): Promise<SuccessResponse> => {
-    return new Promise((resolve, reject) => {
-        bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS, async (err, hash) => {
-            if (err) {
-                return reject({ success: false, response: "Server Error (R-04)" });
-            }
-            // Inserts into DB with hashed password
-            await db.query(`INSERT INTO users (name, email, password, role) VALUES (\"${data.username}\", \"${data.email}\", \"${hash}\", \"user\")`)
-                .then(_ => {
-                    console.log(`New registered user ${data.username} / ${hash} / ${data.email}`);
-
-                    resolve({ success: true, response: "Succesfully registered" });
-                })
-                .catch(err => {
-                    return reject({ success: false, response: err });
-                });
+    const [success, message] = validateLoginData(data);
+    if (!success) {
+        return res.send({
+            success: false,
+            response: message,
         });
-    })
-}
+    }
+    data = data as LoginData
 
-// Register the data
-const tryToRegisterWithData = (data: any): Promise<SuccessResponse> => {
-    return new Promise(async (resolve, reject) => {
-        // Checks if the data request is valid
-        const isValidData = validateRegisterData(data);
-        if (!isValidData.success) {
-            return reject(isValidData);
-        }
-        data = data as RegisterData; // Cast here because if it gets through the first function, it must be register data and LSP completions lol 
-
-        // Checks if the user already exists
-        let doesUserExist = {} as SuccessResponse;
-        await tryDoesUserExist(data)
-            .then(d => doesUserExist = d)
-            .catch(err => doesUserExist = err);
-
-        // Makes sure the response has the right values
-        if (!validateResponse(doesUserExist)) {
-            return reject({ success: false, response: "Server Error (R-03)" });
-        }
-
-        // If the user exist request was a failure, then return respond to user
-        if (!doesUserExist.success) {
-            return reject(doesUserExist);
-        }
-
-        // Tries to insert the user
-        let insertUser = {} as SuccessResponse;
-        await tryInsertUser(data)
-            .then(d => insertUser = d)
-            .catch(err => insertUser = err);
-
-        // Makes sure the response has the right values
-        if (!validateResponse(insertUser)) {
-            return reject({ success: false, response: "Server Error (R-02)" });
-        }
-
-        // If it fails to insert the user, then throw the request
-        if (!insertUser.success) {
-            return reject(insertUser);
-        }
-
-        resolve(insertUser as SuccessResponse);
-    })
-}
-
-
-
-// Attempt to login
-const tryToLoginWithData = (data: any): Promise<SuccessResponse> => {
-    return new Promise(async (resolve, reject) => {
-        // Checks if the data request is valid
-        const isValidData = validateLoginData(data);
-        if (!isValidData.success) {
-            return reject(isValidData);
-        }
-
-        data = data as LoginData
-
-        let doesUserExist = {} as SuccessResponse;
-        // Checks if the user exists and returns uid, name and password in respond
-        await tryDoesUserExistByName(data.username, ["uid", "name", "password"])
-            .then(d => doesUserExist = d)
-            .catch(err => doesUserExist = err);
-
-        if (!doesUserExist.success) {
-            return reject(doesUserExist);
-        }
-
-        // If it's not an array, then this is an SQL bug Lol
-        if (!Array.isArray(doesUserExist.response)) {
-            return reject({
+    let [err, userData] = await handlePromise<IQueryData | string>(tryCheckIfUserExistsByName(data.username, ["name", "uid", "password"]));
+    if (err) {
+        console.log("here");
+        return res.send({
+            success: false,
+            response: "User does not exist, check your username or register with us"
+        })
+    }
+    
+    // Makes sure the user columns exist
+    // @ts-ignore
+    if (typeof userData.response !== 'object' || !validateKeys(userData.response, ["password", "uid", "name"])) {
+        return res.send({
+            success: false,
+            response: "Server Error (SLK)",
+        })
+    }
+    
+    // @ts-ignore
+    bcrypt.compare(data.password, userData.response.password).then(match => {
+        // User and password matched
+        if (!match) {
+            return res.send({
                 success: false,
-                response: "Server Error (L-01)",
+                response: "Incorrect Password",
             })
         }
 
-        // If there is more than one user with the same name, this is a BIG problem
-        if (doesUserExist.response.length > 1) {
-            return reject({
-                success: false,
-                response: "Server Error (L-02)",
-            })
+        const payload = {
+            // @ts-ignore
+            username: userData.response.name,
+            // @ts-ignore
+            uid: userData.response.uid,
         }
 
-        // Makes sure the user columns exist
-        if (typeof doesUserExist.response[0] !== 'object' || !validateKeys(doesUserExist.response[0], ["password", "uid", "name"])) {
-            return reject({
-                success: false,
-                response: "Server Error (L-03)",
-            })
-        }
-
-
-        bcrypt.compare(data.password, doesUserExist.response[0].password).then(match => {
-            // User and password matched
-            if (!match) {
-                return reject({
+        // Creates a jwt token that expires in 3 months with uid and username
+        jwt.sign(payload, JWT_KEY, { expiresIn: 7_890_000 }, (err, token) => {
+            if (err) {
+                return res.send({
                     success: false,
-                    response: "Incorrect Password",
+                    response: "Server Error (L-04)",
                 })
             }
-
-            const payload = {
-                // @ts-ignore
-                username: doesUserExist.response[0].name,
-                // @ts-ignore
-                uid: doesUserExist.response[0].uid,
-            }
-
-            // Creates a jwt token that expires in 3 months with uid and username
-            jwt.sign(payload, JWT_KEY, { expiresIn: 7_890_000 }, (err, token) => {
-                if (err) {
-                    return reject({
-                        success: false,
-                        response: "Server Error (L-04)",
-                    })
-                }
-                return resolve({
-                    success: true,
-                    response: "Bearer " + token,
-                })
+            return res.send({
+                success: true,
+                response: "Bearer " + token,
             })
         })
     })
-}
-
-router.post("/register", (req, res) => {
-    let data = req.body;
-
-    tryToRegisterWithData(data)
-        .then(d => res.send(d))
-        .catch(err => res.send(err));
-})
-
-router.post("/login", (req, res) => {
-    let data = req.body;
-
-    tryToLoginWithData(data)
-        .then(d => res.send(d))
-        .catch(err => res.send(err));
 })
 
 export default router;

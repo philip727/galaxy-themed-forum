@@ -65,6 +65,7 @@ export default function Register({ userDetails }: Props) {
             .then(res => {
                 const data = res.data;
                 if (!data.success) {
+                    console.log(data.response);
                     createNotification({
                         text: data.response
                     });
@@ -88,7 +89,7 @@ export default function Register({ userDetails }: Props) {
                 // Server error prompt if it can't make the request
                 createModal({
                     header: "Register",
-                    subtext: "Server Error (R-01)",
+                    subtext: "Server is unavailable (CR)",
                     buttons: [{
                         text: "Ok",
                         fn: destroyModal,

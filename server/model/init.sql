@@ -6,18 +6,19 @@ CREATE TABLE users (
     name VARCHAR(16) NOT NULL UNIQUE,
     email varchar(50) NOT NULL UNIQUE,
     regdate DATETIME NOT NULL DEFAULT NOW(),
+    role VARCHAR(16) NOT NULL,
     password varchar(72) NOT NULL
 );
 
 /* create categories table */
-CREATE TABLE categories  (
+CREATE TABLE categories (
 	CID int PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
     name VARCHAR(16) NOT NULL UNIQUE,
     description VARCHAR(255) NOT NULL
 );
 
 /* create categories table */
-CREATE TABLE posts  (
+CREATE TABLE posts (
 	PID int PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
     name VARCHAR(16) NOT NULL,
     content TEXT NULL,

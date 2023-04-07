@@ -1,4 +1,3 @@
-import { SuccessResponse } from "../types/api"
 import { validateAllFields, validateKeys } from "./api"
 
 export const validateUsername = (username: string): [boolean, string] => {
@@ -45,89 +44,56 @@ export const validateEmail = (email: string): [boolean, string] => {
 }
 
 // Validates the register data
-export const validateRegisterData = (data: any): SuccessResponse => {
+export const validateRegisterData = (data: any): [boolean, any] => {
     // Make sure the data is an object
     if (!data || !(typeof data == "object")) {
-        return {
-            success: false,
-            response: "Failed to receive data from client, try refreshing",
-        };
+        return [false, "Failed to receive data from client, try refreshing"]
     };
 
     // Make sure the data contains all the required properties
     if (!validateKeys(data, ["username", "email", "password"])) {
-        return {
-            success: false,
-            response: "Not received all properties in data, try refreshing",
-        };
+        return [false, "Not received all properties in data, try refreshing"] 
     }
 
     if (!validateAllFields(data)) {
-        return {
-            success: false,
-            response: "Please fill in all required fields",
-        };
+        return [false, "Please fill in all required fields"] 
     }
 
     // Makes sure the username is ok
     const [validUsername, usernameMessage] = validateUsername(data.username)
     if (!validUsername) {
-        return {
-            success: false,
-            response: usernameMessage,
-        };
+        return [false, usernameMessage]
     }
 
     // Makes sure the password is ok and meets the criteria
     const [validPassword, passwordMessage] = validatePassword(data.password);
     if (!validPassword) {
-        return {
-            success: false,
-            response: passwordMessage
-        };
+        return [false, passwordMessage]
     }
    
     // Makes sure the email is ok
     const [validEmail, emailMessage] = validateEmail(data.email);
     if (!validEmail) {
-        return {
-            success: false,
-            response: emailMessage,
-        }
+        return [false, emailMessage]
     }
 
-    return {
-        success: true,
-        response: data,
-    };
+    return [true, data]
 }
 
-export const validateLoginData = (data: any): SuccessResponse => { // Make sure the data is an object 
+export const validateLoginData = (data: any): [boolean, any] => { // Make sure the data is an object 
     if (!data || !(typeof data == "object")) {
-        return {
-            success: false,
-            response: "Failed to receive data from client, try refreshing",
-        };
+        return [false, "Failed to receive data from client, try refreshing"] 
     }
 
     // Make sure the data contains all the required properties
     if (!validateKeys(data, ["username", "password"])) {
-        return {
-            success: false,
-            response: "Not received all properties in data, try refreshing",
-        }
+        return [false, "Not received all properties in data, try refreshing"] 
     }
 
     if (!validateAllFields(data)) {
-        return {
-            success: false,
-            response: "Please fill in all required fields",
-        };
+        return [false, "Please fill in all required fields"]
     }
     
-    return {
-        success: true,
-        response: data,
-    }
+    return [true, data]
 }
 

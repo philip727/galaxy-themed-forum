@@ -9,7 +9,7 @@ const bodyParser = require('body-parser');
 import jwt from 'jsonwebtoken'
 import { JWT_KEY } from '../../config/keys';
 import { IJWTVerifiedTokenData } from '../../types/auth';
-import { verifyJWTData } from '../../validation/auth';
+import { verifyReceivedJWT } from '../../validation/auth';
 
 
 router.use(bodyParser.urlencoded({
@@ -19,8 +19,8 @@ router.use(cors());
 
 router.post('/verifylogin', (req, res) => {
     // Makes sure the post contains the jwt 
-    if (!verifyJWTData(req.body)) {
-        res.send({
+    if (!verifyReceivedJWT(req.body)) {
+        return res.send({
             success: false,
             response: "Failed to verify session token",
         })

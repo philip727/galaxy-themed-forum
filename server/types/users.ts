@@ -15,4 +15,6 @@ export interface IDataFromExistingUser {
     password: string,
 }
 
-
+export interface IQueryData {
+    response: object,
+}
