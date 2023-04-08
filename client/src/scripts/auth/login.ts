@@ -54,7 +54,7 @@ const requestVerifyLogin = (jwt: string) => {
             "Access-Control-Allow-Origin": "*",
             "Content-Type": "application/x-www-form-urlencoded",
         },
-        url: "/api/auth/verifylogin",
+        url: "/api/auth/verify/jwt",
         data: {
             jwt: jwt,
         },

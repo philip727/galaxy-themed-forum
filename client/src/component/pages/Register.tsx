@@ -10,7 +10,6 @@ import { IJWTInfo } from '../../types/auth';
 import { IDetailsToRegister } from '../../types/user';
 import InputField from '../extras/InputField';
 import ShineButton from '../extras/ShineButton';
-import Container from '../layout/blocks/Container';
 
 // For initial fade in
 const animationVariants = {
@@ -106,7 +105,7 @@ export default function Register({ userDetails }: Props) {
         >
             <h1 className="text-5xl font-extrabold">Sign up</h1>
             <div className="gap-7 mt-12">
-                <Container key={1}>
+                <div className="container w-[30rem]">
                     <div className="w-full h-full flex flex-col justify-center gap-8 items-center p-8">
                         <InputField onChange={handleChange} type="text" name="username" placeholder="Username" />
                         <InputField onChange={handleChange} type="email" name="email" placeholder="Email" />
@@ -116,7 +115,7 @@ export default function Register({ userDetails }: Props) {
                             <p>Create Account</p>
                         </ShineButton>
                     </div>
-                </Container>
+                </div>
             </div>
         </motion.div>
     );

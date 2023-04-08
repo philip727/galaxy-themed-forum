@@ -17,7 +17,7 @@ router.use(bodyParser.urlencoded({
 }));
 router.use(cors());
 
-router.post('/verifylogin', async (req, res) => {
+router.post('/verify/jwt', async (req, res) => {
     // Makes sure the post contains the jwt 
     if (!verifyReceivedJWT(req.body)) {
         return res.send({
@@ -25,6 +25,7 @@ router.post('/verifylogin', async (req, res) => {
             response: "Failed to verify session token"
         })
     }
+
     const data = req.body as IJWTToken;
     const [err, result] = await handlePromise<string>(verifyJWTToken(data.jwt));
     if (err) {
@@ -39,8 +40,5 @@ router.post('/verifylogin', async (req, res) => {
         response: result 
     });
 })
-
-
-
 
 export default router;

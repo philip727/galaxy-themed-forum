@@ -8,7 +8,6 @@ import jwtDecode from 'jwt-decode'
 import { IJWTInfo } from '../../types/auth';
 import { createModal } from '../../scripts/layout/modalManager';
 import { createNotification } from '../../scripts/layout/notificationManager';
-import Container from '../layout/blocks/Container';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ModalFunctionTypes } from '../../types/layout';
@@ -122,7 +121,7 @@ export default function Login({ setUser, userDetails }: Props) {
             <div
                 className="flex justify-center mt-12"
             >
-                <Container>
+                <div className="container w-[30rem]">
                     <div className="w-full h-full flex flex-col justify-center gap-8 items-center p-8">
                         <InputField onChange={handleChange} type="text" name="username" placeholder="Username" />
                         <InputField onChange={handleChange} type="password" name="password" placeholder="Password" />
@@ -130,7 +129,7 @@ export default function Login({ setUser, userDetails }: Props) {
                             <p>Login</p>
                         </ShineButton>
                     </div>
-                </Container>
+                </div>
             </div>
         </motion.div>
     )

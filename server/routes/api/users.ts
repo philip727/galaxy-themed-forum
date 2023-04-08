@@ -24,7 +24,7 @@ router.use(cors());
 
 
 // Grabs all the users user names from the list
-router.get("/getusers", async (_, res) => {
+router.get("/", async (_, res) => {
     const [err, data] = await handlePromise<string>(db.query("SELECT name, uid, role FROM users;"));
     if (err) {
         return res.send({
@@ -40,7 +40,7 @@ router.get("/getusers", async (_, res) => {
 });
 
 // Grabs a specific user by UID
-router.get("/getuser/:id", async (req, res) => {
+router.get("/byid/:id", async (req, res) => {
     const regex = /^[0-9]+$/;
 
     // If the uid is not a number, clearly the user tried to tamper with the url
