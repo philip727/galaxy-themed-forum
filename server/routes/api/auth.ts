@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 import { IJWTToken } from '../../types/auth';
 import { verifyReceivedJWT } from '../../validation/auth';
 import { verifyJWTToken } from '../../scripts/auth';
+import handlePromise from '../../scripts/promiseHandler';
 
 
 router.use(bodyParser.urlencoded({
@@ -16,24 +17,27 @@ router.use(bodyParser.urlencoded({
 }));
 router.use(cors());
 
-router.post('/verifylogin', (req, res) => {
+router.post('/verifylogin', async (req, res) => {
     // Makes sure the post contains the jwt 
     if (!verifyReceivedJWT(req.body)) {
         return res.send({
             success: false,
-            response: "Failed to verify session token",
+            response: "Failed to verify session token"
         })
     }
     const data = req.body as IJWTToken;
-    verifyJWTToken(data.jwt)
-    .then(result => res.send({
-        success: true,
-        response: result,
-    }))
-    .catch(err => res.send({
-        success: false,
-        response: err,
-    }))
+    const [err, result] = await handlePromise<string>(verifyJWTToken(data.jwt));
+    if (err) {
+        return res.send({
+            success: false,
+            response: err
+        });
+    }
+
+    res.send({ 
+        success: true, 
+        response: result 
+    });
 })
 
 

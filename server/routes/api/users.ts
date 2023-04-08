@@ -9,8 +9,6 @@ const bodyParser = require('body-parser');
 
 // Encryption Imports
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
-import { JWT_KEY } from '../../config/keys';
 
 // Validation imports
 import { validateKeys } from '../../validation/api';
@@ -26,24 +24,23 @@ router.use(cors());
 
 
 // Grabs all the users user names from the list
-router.get("/getusers", (_, res) => {
-    db.query("SELECT name, uid, role FROM users")
-        .then(data =>
-            res.send({
-                success: true,
-                response: data
-            })
-        )
-        .catch(_ =>
-            res.send({
-                success: false,
-                message: "Failed to grab users",
-            })
-        );
+router.get("/getusers", async (_, res) => {
+    const [err, data] = await handlePromise<string>(db.query("SELECT name, uid, role FROM users;"));
+    if (err) {
+        return res.send({
+            success: false,
+            message: "Failed to grab users",
+        })
+    }
+
+    res.send({
+        success: true,
+        response: data
+    })
 });
 
 // Grabs a specific user by UID
-router.get("/getuser/:id", (req, res) => {
+router.get("/getuser/:id", async (req, res) => {
     const regex = /^[0-9]+$/;
 
     // If the uid is not a number, clearly the user tried to tamper with the url
@@ -56,27 +53,27 @@ router.get("/getuser/:id", (req, res) => {
     }
 
     // Grabs the user by UID from the db
-    db.query(`SELECT name, uid, role FROM users WHERE uid = ${req.params.id};`)
-        .then(data => {
-            // If the array is empty, then the user index hasn't been created
-            if (Array.isArray(data) && data.length == 0) {
-                return res.send({
-                    success: false,
-                    message: `No user with the uid: ${req.params.id} exists`,
-                });
-            }
-            // Returns the data assosciated with the index
-            res.send({
-                success: true,
-                response: data,
-            });
+    const [err, data] = await handlePromise<string>(db.query(`SELECT name, uid, role FROM users WHERE uid = ${req.params.id};`));
+    if (err) {
+        return res.send({
+            success: false,
+            message: `No user with the uid: ${req.params.id} exists`,
         })
-        .catch(_ =>
-            res.send({
-                success: false,
-                message: `No user with the uid: ${req.params.id} exists`,
-            })
-        );
+    }
+    
+    // If the array is empty, then the user index hasn't been created
+    if (Array.isArray(data) && data.length == 0) {
+        return res.send({
+            success: false,
+            message: `No user with the uid: ${req.params.id} exists`,
+        });
+    }
+
+    // Returns the data assosciated with the index
+    res.send({
+        success: true,
+        response: data,
+    });
 });
 
 router.post("/register", async (req, res) => {

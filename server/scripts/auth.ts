@@ -17,7 +17,7 @@ export const verifyJWTToken = (jwtToken: string): Promise<string> => {
     return new Promise((resolve, reject) => {
         try {
             const jwtTokenParsed = jwtToken.split("Bearer ")[1];
-            const verified = jwt.verify(jwtTokenParsed, JWT_KEY)
+            const _ = jwt.verify(jwtTokenParsed, JWT_KEY)
             resolve(jwtToken)
         } catch (_) {
             reject("Failed to verify session token")

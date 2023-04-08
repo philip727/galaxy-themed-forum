@@ -94,6 +94,11 @@ export const validateLoginData = (data: any): [boolean, any] => { // Make sure t
         return [false, "Please fill in all required fields"]
     }
     
+    const [validUsername, usernameMessage] = validateUsername(data.username);
+    if (!validUsername) {
+        return [false, usernameMessage];
+    }
+
     return [true, data]
 }
 
