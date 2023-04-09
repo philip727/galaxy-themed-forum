@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { JWT_KEY } from '../config/keys';
+import { JWT_KEY } from '../config';
 import { IJWTPayload, IJWTToken } from "../types/auth"
 
 export const createJWTFromPayload = (payload: IJWTPayload): Promise<string> => {

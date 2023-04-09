@@ -6,7 +6,7 @@ import { setAuthTokenHeader } from "./headers";
 
 
 // Updates the auth items using the jwt
-export const updateAuthItemsWithJWTToken = (jwt: string, setCookie?: boolean): Promise<string> => {
+export const updateAuthWithJWTToken = (jwt: string, setToken?: boolean): Promise<string> => {
     return new Promise(async (resolve, reject) => {
         const [err, res] = await handlePromise<string>(verifyJWTToken(jwt));
 
@@ -18,7 +18,7 @@ export const updateAuthItemsWithJWTToken = (jwt: string, setCookie?: boolean): P
 
         const verifiedJWT = res as string;
 
-        if (setCookie) {
+        if (setToken) {
             localStorage.setItem(LOGIN_TOKEN_NAME, verifiedJWT);
         }
 

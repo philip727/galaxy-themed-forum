@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios'
 import { ChangeEvent, useEffect, useRef } from "react";
-import { isLoginDataValid, updateAuthItemsWithJWTToken } from '../../scripts/auth/login';
+import { isLoginDataValid, updateAuthWithJWTToken } from '../../scripts/auth/login';
 import { IDetailsToLogin } from "../../types/user";
 import InputField from "../inputs/InputField"
 import ShineButton from "../inputs/ShineButton"
@@ -33,7 +33,7 @@ export default function Login() {
     // Logs in with the jwt token
     const jwtLogin = async (jwt: string) => {
         // Verifies the jwt with the server
-        const [err, res] = await handlePromise<string>(updateAuthItemsWithJWTToken(jwt, true));
+        const [err, res] = await handlePromise<string>(updateAuthWithJWTToken(jwt, true));
         if (err) {
             // Creates a prompt with the error message
             createModal({

@@ -3,9 +3,9 @@ const router = express.Router();
 import { db } from '../../index';
 import { IQueryData, LoginData, RegisterData } from '../../types/users';
 
-// POST stuff 
 const cors = require('cors');
 const bodyParser = require('body-parser');
+import { ORIGIN_URL } from '../../config';
 
 // Encryption Imports
 import bcrypt from 'bcrypt'
@@ -20,7 +20,6 @@ import { createJWTFromPayload } from '../../scripts/auth';
 router.use(bodyParser.urlencoded({
     extended: true
 }));
-router.use(cors());
 
 
 // Grabs all the users user names from the list
@@ -91,7 +90,7 @@ router.get("/last", async (_, res) => {
     });
 });
 
-router.post("/register", async (req, res) => {
+router.post("/register", cors({ origin: ORIGIN_URL }), async (req, res) => {
     let data = req.body;
 
     const [success, message] = validateRegisterData(data);
@@ -150,7 +149,7 @@ router.post("/register", async (req, res) => {
     })
 })
 
-router.post("/login", async (req, res) => {
+router.post("/login", cors({ origin: ORIGIN_URL }), async (req, res) => {
     let data = req.body;
 
     const [success, message] = validateLoginData(data);

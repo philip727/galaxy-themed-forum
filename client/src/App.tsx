@@ -3,7 +3,7 @@ import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } 
 import './App.scss'
 import { IJWTInfo } from './types/auth';
 import { LOGIN_TOKEN_NAME } from './scripts/config';
-import { deleteJWTCookie, updateAuthItemsWithJWTToken } from './scripts/auth/login';
+import { deleteJWTCookie, updateAuthWithJWTToken } from './scripts/auth/login';
 import jwtDecode from 'jwt-decode';
 import RootLayout from './component/layout/RootLayout';
 import Home, { homeLoader } from './component/pages/Home';
@@ -13,18 +13,20 @@ import { createModal } from './scripts/layout/modalManager';
 import { ModalFunctionTypes } from './types/layout';
 import handlePromise from './scripts/promiseHandler';
 import Category from './component/pages/Category';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { updateUser } from './reducers/user';
-import PrivateWrapper from './component/wrappers/PrivateWrapper';
-import UnauthorizedWrapper from './component/wrappers/UnauthorizedWrapper';
+import { PrivateWrapper, UnauthorizedWrapper } from './component/Wrappers';
+import socketIOClient from 'socket.io-client'
+import { RootState } from './store';
 
 function App() {
+    const user = useSelector((state: RootState) => state.user.value)
     const dispatch = useDispatch();
 
     // Logs in with the jwt
     const jwtLogin = async (jwt: string) => {
         // Verifies the jwt with the server
-        const [err, res] = await handlePromise<string>(updateAuthItemsWithJWTToken(jwt));
+        const [err, res] = await handlePromise<string>(updateAuthWithJWTToken(jwt));
         if (err) {
             // Creates a prompt if with the error message
             createModal({
@@ -36,7 +38,7 @@ function App() {
                         fn: ModalFunctionTypes.CLOSE,
                     }
                 ]
-            })
+            });
             return;
         }
 
@@ -62,6 +64,15 @@ function App() {
 
         jwtLogin(token);
     }, [])
+
+    useEffect(() => {
+        if (user.uid < 0 || user.username.length == 0) {
+            return;
+        }
+        const socket = socketIOClient("http://localhost:3100", { reconnectionAttempts: 5 });
+
+
+    }, [user])
 
     return (
         <RouterProvider router={
