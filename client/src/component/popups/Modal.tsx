@@ -1,6 +1,6 @@
 import { motion } from "framer-motion"
 import { ModalDetails, ModalFunctionTypes } from "../../types/layout"
-import ShineButton from "../extras/ShineButton";
+import ShineButton from "../inputs/ShineButton";
 
 type Props = {
     modalDetails: ModalDetails,

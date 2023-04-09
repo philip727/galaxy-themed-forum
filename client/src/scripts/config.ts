@@ -1,3 +1,3 @@
 // AUTH STUFF
-export const LOGIN_COOKIE_TOKEN = "login-token";
+export const LOGIN_TOKEN_NAME = "login-token";
 

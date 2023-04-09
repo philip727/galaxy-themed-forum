@@ -4,12 +4,10 @@ export interface IUserDetails {
 }
 
 export interface IPublicUserDetails {
-    username: string,
+    name: string,
     uid: number,
-}
-
-export interface LoginDetails extends IPublicUserDetails {
-    isLoggedIn: Boolean,
+    role: string,
+    regdate: string,
 }
 
 export interface IDetailsToRegister extends IUserDetails {
@@ -20,5 +18,10 @@ export interface IDetailsToRegister extends IUserDetails {
 export interface IDetailsToLogin {
     username: string,
     password: string,
+}
+
+export interface IUserReducerAction {
+    payload: { username: string, uid: number },
+    type: string,
 }
 

@@ -2,21 +2,17 @@ import axios, { AxiosResponse } from 'axios'
 import { ChangeEvent, useEffect, useRef } from "react";
 import { isLoginDataValid, updateAuthItemsWithJWTToken } from '../../scripts/auth/login';
 import { IDetailsToLogin } from "../../types/user";
-import InputField from "../extras/InputField"
-import ShineButton from "../extras/ShineButton"
+import InputField from "../inputs/InputField"
+import ShineButton from "../inputs/ShineButton"
 import jwtDecode from 'jwt-decode'
 import { IJWTInfo } from '../../types/auth';
 import { createModal } from '../../scripts/layout/modalManager';
 import { createNotification } from '../../scripts/layout/notificationManager';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { ModalFunctionTypes } from '../../types/layout';
 import handlePromise from '../../scripts/promiseHandler';
-
-type Props = {
-    setUser: (i: IJWTInfo) => void,
-    userDetails: IJWTInfo,
-}
+import { useDispatch } from 'react-redux';
+import { updateUser } from '../../reducers/user';
 
 const animationVariants = {
     hide: {
@@ -27,8 +23,8 @@ const animationVariants = {
     },
 }
 
-export default function Login({ setUser, userDetails }: Props) {
-    const navigate = useNavigate();
+export default function Login() {
+    const dispatch = useDispatch();
     const loginData = useRef<IDetailsToLogin>({
         username: "",
         password: "",
@@ -55,7 +51,7 @@ export default function Login({ setUser, userDetails }: Props) {
 
         const userDetails = jwtDecode(res as string) as IJWTInfo;
 
-        setUser(userDetails);
+        dispatch(updateUser({ username: userDetails.username, uid: userDetails.uid }));
     }
 
     const login = async () => {
@@ -77,7 +73,7 @@ export default function Login({ setUser, userDetails }: Props) {
             console.log(err);
             return;
         }
-        
+
         const data = res?.data;
 
         if (!data.success) {
@@ -101,13 +97,6 @@ export default function Login({ setUser, userDetails }: Props) {
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         loginData.current = { ...loginData.current, [event.target.name]: event.target.value };
     }
-
-    // Makes sure the user goes back to home page if already logged in
-    useEffect(() => {
-        if (userDetails.username.length > 0 && userDetails.uid > 0) {
-            navigate("/");
-        }
-    }, [userDetails])
 
     return (
         <motion.div

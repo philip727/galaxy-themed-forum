@@ -1,5 +1,5 @@
 import { motion, useAnimationControls } from "framer-motion";
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { INotificationDetailsWithID } from "../../types/layout"
 
 export type Props = {

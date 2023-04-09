@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom/client'
-import Modal from '../../component/layout/Modal';
+import Modal from '../../component/popups/Modal';
 import { ModalDetails } from '../../types/layout';
 
 let root: ReactDOM.Root | null = null;

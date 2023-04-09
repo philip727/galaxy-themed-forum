@@ -6,10 +6,9 @@ import { isRegisterDataValid } from '../../scripts/auth/register';
 import { createModal, destroyModal } from '../../scripts/layout/modalManager';
 import { createNotification } from '../../scripts/layout/notificationManager';
 import handlePromise from '../../scripts/promiseHandler';
-import { IJWTInfo } from '../../types/auth';
 import { IDetailsToRegister } from '../../types/user';
-import InputField from '../extras/InputField';
-import ShineButton from '../extras/ShineButton';
+import InputField from '../inputs/InputField';
+import ShineButton from '../inputs/ShineButton';
 
 // For initial fade in
 const animationVariants = {
@@ -21,12 +20,7 @@ const animationVariants = {
     }
 }
 
-type Props = {
-    userDetails: IJWTInfo,
-}
-
-
-export default function Register({ userDetails }: Props) {
+export default function Register() {
     const navigate = useNavigate();
     const registerData = useRef<IDetailsToRegister>({
         username: "",
@@ -89,11 +83,6 @@ export default function Register({ userDetails }: Props) {
     }
 
     // Makes sure the user goes back to home page if already logged in
-    useEffect(() => {
-        if (userDetails.username.length > 0 && userDetails.uid > 0) {
-            navigate("/");
-        }
-    }, [userDetails])
 
     return (
         <motion.div

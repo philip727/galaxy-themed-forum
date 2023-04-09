@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom/client'
-import Notification from '../../component/layout/Notification';
+import Notification from '../../component/popups/Notification';
 import { INotificationDetails, INotificationDetailsWithID } from '../../types/layout';
 import { generateRandomString } from '../utils/idGenerator';
 

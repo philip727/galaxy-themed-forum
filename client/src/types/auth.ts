@@ -5,12 +5,3 @@ export interface IJWTInfo {
     exp: number,
 }
 
-export interface IAuthenticationState {
-   isAuthenticated: boolean,
-   user: IJWTInfo,
-}
-
-export interface IJWTLoginInfo {
-    success: boolean,
-    data: IJWTInfo,
-}

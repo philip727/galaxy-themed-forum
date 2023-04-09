@@ -1,46 +1,25 @@
-// React & Styling
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom'
 import './App.scss'
-
-// JWT & Authentication
 import { IJWTInfo } from './types/auth';
-import { LOGIN_COOKIE_TOKEN as LOGIN_TOKEN_NAME } from './scripts/config';
-import { deleteJWTCookie, updateAuthItemsWithJWTToken as updateAuthItemsWithJWTToken } from './scripts/auth/login';
+import { LOGIN_TOKEN_NAME } from './scripts/config';
+import { deleteJWTCookie, updateAuthItemsWithJWTToken } from './scripts/auth/login';
 import jwtDecode from 'jwt-decode';
-import { setAuthTokenHeader } from './scripts/auth/headers';
-
-// Components
 import RootLayout from './component/layout/RootLayout';
-import Home from './component/pages/Home/Home';
+import Home, { homeLoader } from './component/pages/Home';
 import Login from './component/pages/Login';
 import Register from './component/pages/Register';
 import { createModal } from './scripts/layout/modalManager';
 import { ModalFunctionTypes } from './types/layout';
 import handlePromise from './scripts/promiseHandler';
+import Category from './component/pages/Category';
+import { useDispatch } from 'react-redux';
+import { updateUser } from './reducers/user';
+import PrivateWrapper from './component/wrappers/PrivateWrapper';
+import UnauthorizedWrapper from './component/wrappers/UnauthorizedWrapper';
 
 function App() {
-    const [user, setUser] = useState<IJWTInfo>({
-        username: "",
-        uid: -1,
-        iat: 0,
-        exp: 0,
-    })
-
-    const updateUser = (userDetails: IJWTInfo) => {
-        setUser(userDetails);
-    }
-
-    const clearUser = () => {
-        setUser({
-            username: "",
-            uid: -1,
-            iat: 0,
-            exp: 0,
-        })
-        setAuthTokenHeader();
-        deleteJWTCookie();
-    }
+    const dispatch = useDispatch();
 
     // Logs in with the jwt
     const jwtLogin = async (jwt: string) => {
@@ -70,7 +49,7 @@ function App() {
             return;
         }
 
-        updateUser(userDetails);
+        dispatch(updateUser({ username: userDetails.username, uid: userDetails.uid }));
     }
 
     useEffect(() => {
@@ -88,10 +67,25 @@ function App() {
         <RouterProvider router={
             createBrowserRouter(
                 createRoutesFromElements(
-                    <Route path="/" element={<RootLayout userDetails={user} clearUser={clearUser} />}>
-                        <Route index element={<Home />} />
-                        <Route path="/register" element={<Register userDetails={user} />} />
-                        <Route path="/login" element={<Login setUser={updateUser} userDetails={user} />} />
+                    <Route path="/" element={<RootLayout />}>
+                        <Route index element={<Home />} loader={homeLoader} />
+
+                        <Route element={<UnauthorizedWrapper />} >
+                            <Route path="/register" element={<Register />} />
+                            <Route path="/login" element={<Login />} />
+                        </Route>
+
+                        <Route path="/category">
+                            <Route path=":id" element={<Category />} />
+                        </Route>
+
+                        <Route path="/profile">
+                            <Route path=":id" element={<Category />} />
+                        </Route>
+
+                        <Route element={<PrivateWrapper />}>
+                            <Route path="/account" />
+                        </Route>
                     </Route>
                 )
             )}

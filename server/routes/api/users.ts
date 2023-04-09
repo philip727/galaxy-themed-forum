@@ -13,7 +13,7 @@ import bcrypt from 'bcrypt'
 // Validation imports
 import { validateKeys } from '../../validation/api';
 import { validateLoginData, validateRegisterData } from '../../validation/users';
-import { tryCheckIfUserDoesNotExistByName, tryCheckIfUserDoesNotExistByEmail, tryCreateNewUser, tryCheckIfUserExistsByName } from '../../scripts/users';
+import { tryCheckIfUserDoesNotExistByName, tryCheckIfUserDoesNotExistByEmail, tryCreateNewUser, tryCheckIfUserExistsByName, tryGrabLastUser } from '../../scripts/users';
 import handlePromise from '../../scripts/promiseHandler';
 import { createJWTFromPayload } from '../../scripts/auth';
 
@@ -60,7 +60,7 @@ router.get("/byid/:id", async (req, res) => {
             message: `No user with the uid: ${req.params.id} exists`,
         })
     }
-    
+
     // If the array is empty, then the user index hasn't been created
     if (Array.isArray(data) && data.length == 0) {
         return res.send({
@@ -70,6 +70,21 @@ router.get("/byid/:id", async (req, res) => {
     }
 
     // Returns the data assosciated with the index
+    res.send({
+        success: true,
+        response: data,
+    });
+});
+
+router.get("/last", async (_, res) => {
+    const [err, data] = await handlePromise<object | string>(tryGrabLastUser());
+    if (err) {
+        return res.send({
+            success: false,
+            response: err,
+        })
+    }
+
     res.send({
         success: true,
         response: data,
@@ -89,7 +104,7 @@ router.post("/register", async (req, res) => {
     data = data as RegisterData; // Cast here because if it gets through the first function, it must be register data and LSP completions lol 
 
     // Checks if the username isn't already taken
-    let [err, _] = await handlePromise<IQueryData | string>(tryCheckIfUserDoesNotExistByName(data.username, ["uid"]))
+    let [err, _] = await handlePromise<object | string>(tryCheckIfUserDoesNotExistByName(data.username, ["uid"]))
     if (err) {
         if (typeof err === "object") {
             return res.send({
@@ -105,7 +120,7 @@ router.post("/register", async (req, res) => {
     }
 
     // Checks if the email isn't already taken
-    [err, _] = await handlePromise<IQueryData | string>(tryCheckIfUserDoesNotExistByEmail(data.email, ["uid"]))
+    [err, _] = await handlePromise<object | string>(tryCheckIfUserDoesNotExistByEmail(data.email, ["uid"]))
     if (err) {
         if (typeof err === "object") {
             return res.send({
@@ -147,25 +162,27 @@ router.post("/login", async (req, res) => {
     }
     data = data as LoginData
 
-    let [err, userData] = await handlePromise<IQueryData | string>(tryCheckIfUserExistsByName(data.username, ["name", "uid", "password"]));
+    let [err, userData] = await handlePromise<object | string>(tryCheckIfUserExistsByName(data.username, ["name", "uid", "password"]));
     if (err) {
         return res.send({
             success: false,
             response: "User does not exist, check your username or register with us"
         })
     }
-    
+
     // Makes sure the user columns exist
     // @ts-ignore
-    if (typeof userData.response !== 'object' || !validateKeys(userData.response, ["password", "uid", "name"])) {
+    if (typeof userData !== 'object' || !validateKeys(userData, ["password", "uid", "name"])) {
         return res.send({
             success: false,
             response: "Server Error (SLK)",
         })
     }
-    
+
+
+
     // @ts-ignore
-    bcrypt.compare(data.password, userData.response.password).then(match => {
+    bcrypt.compare(data.password, userData.password).then(match => {
         // User and password matched
         if (!match) {
             return res.send({
@@ -176,20 +193,20 @@ router.post("/login", async (req, res) => {
 
         const payload = {
             // @ts-ignore
-            username: userData.response.name,
+            username: userData.name,
             // @ts-ignore
-            uid: userData.response.uid,
+            uid: userData.uid,
         }
 
         createJWTFromPayload(payload)
-        .then(token => res.send({
-            success: true,
-            response: token,
-        }))
-        .catch(err => res.send({
-            success: false,
-            response: err
-        }));
+            .then(token => res.send({
+                success: true,
+                response: token,
+            }))
+            .catch(err => res.send({
+                success: false,
+                response: err
+            }));
     })
 })
 

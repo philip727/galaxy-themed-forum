@@ -1,11 +1,11 @@
 import { db } from "../index"
-import { IQueryData, RegisterData } from "../types/users";
+import { RegisterData } from "../types/users";
 import bcrypt from 'bcrypt'
 import handlePromise from "./promiseHandler";
 
 const BCRYPT_SALT_ROUNDS = 12;
 
-export const tryCheckIfUserDoesNotExistByName = (username: string, columns: string[]): Promise<IQueryData | string> => {
+export const tryCheckIfUserDoesNotExistByName = (username: string, columns: string[]): Promise<string> => {
     return new Promise(async (resolve, reject) => {
         const [err, result] = await handlePromise<string>(db.query(`SELECT ${columns.toString()} FROM users WHERE name LIKE \"${username}\";`));
         if (err) {
@@ -17,11 +17,11 @@ export const tryCheckIfUserDoesNotExistByName = (username: string, columns: stri
             return resolve("User does not exist");
         }
 
-        return reject({ response: result });
+        return reject(result);
     })
 }
 
-export const tryCheckIfUserDoesNotExistByEmail = (email: string, columns: string[]): Promise<IQueryData | string> => {
+export const tryCheckIfUserDoesNotExistByEmail = (email: string, columns: string[]): Promise<string> => {
     return new Promise(async (resolve, reject) => {
         const [err, result] = await handlePromise<string>(db.query(`SELECT ${columns.toString()} FROM users WHERE email LIKE \"${email}\";`));
         if (err) {
@@ -33,11 +33,11 @@ export const tryCheckIfUserDoesNotExistByEmail = (email: string, columns: string
             return resolve("User does not exist");
         }
 
-        return reject({ response: result });
+        return reject(result);
     })
 }
 
-export const tryCreateNewUser = (data: RegisterData): Promise<IQueryData | string> => {
+export const tryCreateNewUser = (data: RegisterData): Promise<string> => {
     return new Promise(async (resolve, reject) => {
         bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS, async (bcryptErr, hash) => {
             if (bcryptErr) {
@@ -55,12 +55,12 @@ export const tryCreateNewUser = (data: RegisterData): Promise<IQueryData | strin
 
             console.log(`Created new user ${data.username} / ${hash} / ${data.email}`);
 
-            resolve({ response: data });
+            resolve(data as unknown as string);
         })
     })
 }
 
-export const tryCheckIfUserExistsByName = (username: string, columns: string[]): Promise<IQueryData | string> => {
+export const tryCheckIfUserExistsByName = (username: string, columns: string[]): Promise<object | string> => {
     return new Promise(async (resolve, reject) => {
         const [err, data] = await handlePromise<string>(db.query(`SELECT ${columns.toString()} FROM users WHERE name LIKE \"${username}\";`));
         if (err) {
@@ -76,14 +76,14 @@ export const tryCheckIfUserExistsByName = (username: string, columns: string[]):
             return reject(`There are ${Array.length} users with this name, please contact the site admin`);
         }
 
-        resolve({ response: data[0] });
+        resolve(data[0]);
     })
 }
 
 
 export const tryGrabUserByUID = (uid: number): Promise<string> => {
     return new Promise(async (resolve, reject) => {
-        const [err, data] = await handlePromise<string>(db.query(`SELECT name, uid, role FROM users WHERE uid = ${uid};`));
+        const [err, data] = await handlePromise<string>(db.query(`SELECT name, uid, role, regdate FROM users WHERE uid = ${uid};`));
         if (err) {
             return reject(`No user with the uid: ${uid} exists`);
         }
@@ -95,5 +95,17 @@ export const tryGrabUserByUID = (uid: number): Promise<string> => {
 
         // Returns the data assosciated with the uid
         return resolve(data as string);
+    })
+}
+
+export const tryGrabLastUser = (): Promise<object | string> => {
+    return new Promise(async (resolve, reject) => {
+        const [err, data] = await handlePromise<object>(db.query('SELECT name, uid, role, regdate FROM users ORDER BY UID DESC LIMIT 1'));
+        if (err || (Array.isArray(data) && data.length == 0)) {
+            return reject("Server Error (STGLU)");
+        }
+
+        // @ts-ignore 
+        return resolve(data[0]);
     })
 }

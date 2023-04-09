@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { IDetailsToLogin } from "../../types/user";
-import { LOGIN_COOKIE_TOKEN } from "../config";
+import { LOGIN_TOKEN_NAME } from "../config";
 import handlePromise from "../promiseHandler";
 import { setAuthTokenHeader } from "./headers";
 
@@ -19,7 +19,7 @@ export const updateAuthItemsWithJWTToken = (jwt: string, setCookie?: boolean): P
         const verifiedJWT = res as string;
 
         if (setCookie) {
-            localStorage.setItem(LOGIN_COOKIE_TOKEN, verifiedJWT);
+            localStorage.setItem(LOGIN_TOKEN_NAME, verifiedJWT);
         }
 
         setAuthTokenHeader(verifiedJWT);
@@ -62,8 +62,8 @@ const requestVerifyLogin = (jwt: string) => {
 }
 
 export const deleteJWTCookie = () => {
-    if (localStorage[LOGIN_COOKIE_TOKEN]) {
-        localStorage.removeItem(LOGIN_COOKIE_TOKEN);
+    if (localStorage[LOGIN_TOKEN_NAME]) {
+        localStorage.removeItem(LOGIN_TOKEN_NAME);
     }
 }
 
