@@ -35,12 +35,18 @@ export class SocketIOServer {
         this.onlineUsers = [];
     }
 
-    async #attemptToPushUser(userDetails: IJWTPayload, socket: any) {
-        const userExists = this.#tempUsers.find(x => x.uid == userDetails.uid);
-        if (userExists) {
+
+    async pushUserOnline(userDetails: IJWTPayload, socket: any) {
+        const tempUserFromUID = this.#tempUsers.find(x => x.uid == userDetails.uid);
+        if (tempUserFromUID) {
             return;
         }
-        this.#tempUsers.push({ uid: userDetails.uid, socketId: socket.id});
+        this.#tempUsers.push({ uid: userDetails.uid, socketId: socket.id });
+
+        const onlineUserFromUID = this.onlineUsers.find(x => x.uid == userDetails.uid);
+        if (onlineUserFromUID) {
+            return;
+        }
 
         let [err, data] = await handlePromise<object | string>(getUserRole(userDetails.uid));
 
@@ -53,29 +59,30 @@ export class SocketIOServer {
         this.onlineUsers.push({ name: userDetails.username, uid: userDetails.uid, role: data.role })
     }
 
-    #removeUser(socket: any) {
-        const tempUserFromSocket = this.#tempUsers.find(x => x.socketId == socket.id);        
+    removeUser(socket: any) {
+        const tempUserFromSocket = this.#tempUsers.find(x => x.socketId == socket.id);
         if (!tempUserFromSocket) {
             return;
         }
 
-        let tempUserIndex = this.#tempUsers.indexOf(tempUserFromSocket);
+        const tempUserIndex = this.#tempUsers.indexOf(tempUserFromSocket);
         if (tempUserIndex <= -1) {
             return;
         }
 
-        let userFromUid = this.onlineUsers.find(x => x.uid = tempUserFromSocket.uid);
-        if (!userFromUid) {
-            return;
-        }
+        this.#tempUsers.splice(tempUserIndex, 1);
         
-        let userIndex = this.onlineUsers.indexOf(userFromUid);
-        if (userIndex <= -1) {
+        const userFromOnline = this.onlineUsers.find(x => x.uid == tempUserFromSocket.uid);
+        if (!userFromOnline) {
             return;
         }
 
-        this.#tempUsers.splice(tempUserIndex, 1);
-        this.onlineUsers.splice(userIndex, 1);
+        const userOnlineIndex = this.onlineUsers.indexOf(userFromOnline);
+        if (userOnlineIndex <= -1) {
+            return;
+        }
+
+        this.onlineUsers.splice(userOnlineIndex, 1);
     }
 
     #connection() {
@@ -89,11 +96,11 @@ export class SocketIOServer {
 
                 const userDetails = jwtDecode(jwt) as IJWTPayload;
 
-                await this.#attemptToPushUser(userDetails, socket);
+                this.pushUserOnline(userDetails, socket);
             })
 
             socket.on("disconnect", () => {
-                this.#removeUser(socket);
+                this.removeUser(socket);
             })
         })
     }

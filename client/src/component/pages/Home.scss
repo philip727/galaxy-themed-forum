@@ -1,4 +1,8 @@
-.online-users-grid {
-    @apply grid;
-    grid-template-columns: auto auto auto;
+.online-users {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }

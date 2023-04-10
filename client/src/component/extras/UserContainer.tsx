@@ -9,7 +9,7 @@ export default function UserContainer({ user }: Props) {
     const determineClass = (): string => {
         switch (user.role) {
             case "admin":
-                return "font-extrabold text-[var(--admin-colour)]";
+                return "font-extrabold text-[var(--admin-colour)] admin-container";
             case "moderator":
                 return "font-bold text-[var(--moderator-colour)]";
         }
