@@ -18,6 +18,7 @@ import { updateUser } from './reducers/user';
 import { PrivateWrapper, UnauthorizedWrapper } from './component/Wrappers';
 import socketIOClient from 'socket.io-client'
 import { RootState } from './store';
+import Profile, { profileLoader } from './component/pages/Profile';
 
 function App() {
     const user = useSelector((state: RootState) => state.user.value)
@@ -94,7 +95,7 @@ function App() {
                         </Route>
 
                         <Route path="/profile">
-                            <Route path=":id" element={<Category />} />
+                            <Route path=":id" element={<Profile />} loader={profileLoader} />
                         </Route>
 
                         <Route element={<PrivateWrapper />}>

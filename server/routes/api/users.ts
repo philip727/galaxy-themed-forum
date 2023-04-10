@@ -13,7 +13,7 @@ import bcrypt from 'bcrypt'
 // Validation imports
 import { validateKeys } from '../../validation/api';
 import { validateLoginData, validateRegisterData } from '../../validation/users';
-import { tryCheckIfUserDoesNotExistByName, tryCheckIfUserDoesNotExistByEmail, tryCreateNewUser, tryCheckIfUserExistsByName, tryGrabLastUser } from '../../scripts/users';
+import { tryCheckIfUserDoesNotExistByName, tryCheckIfUserDoesNotExistByEmail, tryCreateNewUser, tryCheckIfUserExistsByName, tryGrabLastUser, tryGrabUserByUID } from '../../scripts/users';
 import handlePromise from '../../scripts/promiseHandler';
 import { createJWTFromPayload } from '../../scripts/auth';
 
@@ -48,7 +48,7 @@ router.get("/online", async (_, res) => {
 })
 
 // Grabs a specific user by UID
-router.get("/byid/:id", async (req, res) => {
+router.get("/id/:id", async (req, res) => {
     const regex = /^[0-9]+$/;
 
     // If the uid is not a number, clearly the user tried to tamper with the url
@@ -61,7 +61,7 @@ router.get("/byid/:id", async (req, res) => {
     }
 
     // Grabs the user by UID from the db
-    const [err, data] = await handlePromise<string>(db.query(`SELECT name, uid, role FROM users WHERE uid = ${req.params.id};`));
+    const [err, data] = await handlePromise<string>(tryGrabUserByUID(req.params.id));
     if (err) {
         return res.send({
             success: false,
@@ -80,7 +80,8 @@ router.get("/byid/:id", async (req, res) => {
     // Returns the data assosciated with the index
     res.send({
         success: true,
-        response: data,
+        // @ts-ignore
+        response: data[0],
     });
 });
 

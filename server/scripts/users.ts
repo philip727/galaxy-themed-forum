@@ -81,7 +81,7 @@ export const tryCheckIfUserExistsByName = (username: string, columns: string[]):
 }
 
 
-export const tryGrabUserByUID = (uid: number): Promise<string> => {
+export const tryGrabUserByUID = (uid: string): Promise<string> => {
     return new Promise(async (resolve, reject) => {
         const [err, data] = await handlePromise<string>(db.query(`SELECT name, uid, role, regdate FROM users WHERE uid = ${uid};`));
         if (err) {
