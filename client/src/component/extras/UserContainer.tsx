@@ -18,7 +18,7 @@ export default function UserContainer({ user }: Props) {
 
     return (
         <Link to={`profile/${user.uid}`}>
-            <p className={`${determineClass()}`}>{user.name}</p>
+            <p className={`${determineClass()} mt-0`}>{user.name}</p>
         </Link>
     )
 }

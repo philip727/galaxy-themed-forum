@@ -5,11 +5,13 @@ import { IHomeLoader } from "../../types/layout";
 import CategoryContainer from "../extras/CategoryContainer";
 import SectionHeader from "../extras/SectionHeader";
 import UserContainer from "../extras/UserContainer";
+import './Home.scss'
 
 export default function Home() {
     const loaderData = useLoaderData() as IHomeLoader;
     const categories = loaderData.categories;
     const lastUser = loaderData.lastUser;
+    const onlineUser = loaderData.onlineUsers;
 
     return (
         <motion.div
@@ -35,6 +37,14 @@ export default function Home() {
                 <div className="container w-[15rem] px-2 py-1">
                     <div className="h-[10rem]">
                         <p className="font-bold">Online users:</p>
+                        {onlineUser.success && (
+                            <>
+                                {onlineUser.response.map((user, index) => {
+                                    console.log(user);
+                                    return <UserContainer key={index} user={user} />
+                                })}
+                            </>
+                        )}
                     </div>
                     {lastUser.success && (
                         <div className="flex flex-row">
@@ -49,12 +59,13 @@ export default function Home() {
 }
 
 export const homeLoader = async () => {
-    const [categories, lastUser] = await Promise.all([
+    const [categories, lastUser, onlineUsers] = await Promise.all([
         fetchGeneralCategories(),
         fetchLastUser(),
+        fetchOnlineUsers(),
     ])
 
-    return json({ categories: categories.data, lastUser: lastUser.data });
+    return json({ categories: categories.data, lastUser: lastUser.data, onlineUsers: onlineUsers.data });
 }
 
 
@@ -68,6 +79,13 @@ const fetchGeneralCategories = () => {
 const fetchLastUser = () => {
     return axios.request({
         url: "/api/user/last",
+        method: "GET",
+    })
+}
+
+const fetchOnlineUsers = () => {
+    return axios.request({
+        url: "/api/user/online",
         method: "GET",
     })
 }

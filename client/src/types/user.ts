@@ -7,6 +7,9 @@ export interface IPublicUserDetails {
     name: string,
     uid: number,
     role: string,
+}
+
+export interface IPublicRegisterDetails extends IPublicUserDetails {
     regdate: string,
 }
 

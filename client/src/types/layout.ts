@@ -1,5 +1,5 @@
 import { ServerResponse } from "./response";
-import { IPublicUserDetails } from "./user";
+import { IPublicRegisterDetails, IPublicUserDetails } from "./user";
 
 export type ModalDetails = {
     header: string,
@@ -29,5 +29,6 @@ export interface ICategoryDetails {
 
 export interface IHomeLoader {
     categories: ServerResponse<ICategoryDetails[]>;
-    lastUser: ServerResponse<IPublicUserDetails>; 
+    lastUser: ServerResponse<IPublicRegisterDetails>; 
+    onlineUsers: ServerResponse<IPublicUserDetails[]>; 
 }

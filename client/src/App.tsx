@@ -66,11 +66,14 @@ function App() {
     }, [])
 
     useEffect(() => {
-        if (user.uid < 0 || user.username.length == 0) {
+        if (user.uid < 0 || user.username.length == 0 || !localStorage[LOGIN_TOKEN_NAME]) {
             return;
         }
         const socket = socketIOClient("http://localhost:3100", { reconnectionAttempts: 5 });
-
+        
+        socket.on('connect', () => {
+            socket.emit('online', localStorage[LOGIN_TOKEN_NAME]); 
+        })
 
     }, [user])
 

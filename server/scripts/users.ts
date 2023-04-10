@@ -109,3 +109,18 @@ export const tryGrabLastUser = (): Promise<object | string> => {
         return resolve(data[0]);
     })
 }
+
+export const getUserRole = (uid: number): Promise <object | string> => {
+    return new Promise(async (resolve, reject) => {
+        const [err, data] = await handlePromise<object>(db.query(`SELECT role FROM users WHERE uid = ${uid};`));   
+        if (err) {
+            return reject("Server Error (STGUR)");
+        }
+
+        if (!Array.isArray(data) || data.length > 1) {
+            return reject(`No user with the uid ${uid}`);
+        }
+
+        return resolve(data[0])
+    })
+}

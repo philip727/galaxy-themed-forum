@@ -4,6 +4,6 @@ export interface IJWTToken {
 
 export interface IJWTPayload {
     username: string,
-    uid: string,
+    uid: number,
 }
 

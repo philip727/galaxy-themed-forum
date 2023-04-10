@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import { db } from '../../index';
+import { db, socketIOServer } from '../../index';
 import { IQueryData, LoginData, RegisterData } from '../../types/users';
 
 const cors = require('cors');
@@ -37,6 +37,15 @@ router.get("/", async (_, res) => {
         response: data
     })
 });
+
+router.get("/online", async (_, res) => {
+    const onlineUsers = socketIOServer.onlineUsers; 
+
+    res.send({
+        success: true,
+        response: onlineUsers
+    })
+})
 
 // Grabs a specific user by UID
 router.get("/byid/:id", async (req, res) => {

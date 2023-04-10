@@ -31,7 +31,7 @@ export const updateAuthWithJWTToken = (jwt: string, setToken?: boolean): Promise
 // Verifies the JWT Token with the server side
 export const verifyJWTToken = (jwt: string): Promise<string> => {
     return new Promise(async (resolve, reject) => {
-        const [err, res] = await handlePromise<AxiosResponse<any, any>>(requestVerifyLogin(jwt));
+        const [err, res] = await handlePromise<AxiosResponse<any, any>>(requestVerifyJWT(jwt));
         if (err) {
             return reject("Server Error (CVJC)");
         }
@@ -44,10 +44,9 @@ export const verifyJWTToken = (jwt: string): Promise<string> => {
 
         return resolve(data.response);
     })
-
 }
 
-const requestVerifyLogin = (jwt: string) => {
+const requestVerifyJWT = (jwt: string) => {
     return axios.request({
         method: "POST",
         headers: {
