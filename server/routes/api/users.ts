@@ -11,21 +11,29 @@ import { ORIGIN_URL } from '../../config';
 import bcrypt from 'bcrypt'
 
 // Validation imports
-import { validateKeys } from '../../validation/api';
 import { validateLoginData, validateRegisterData } from '../../validation/users';
-import { tryCheckIfUserDoesNotExistByName, tryCheckIfUserDoesNotExistByEmail, tryCreateNewUser, tryCheckIfUserExistsByName, tryGrabLastUser, tryGrabUserByUID } from '../../scripts/users';
 import handlePromise from '../../scripts/promiseHandler';
 import { createJWTFromPayload } from '../../scripts/auth';
+import { DEFAULT_COLUMNS, findAllUsers, findUser, findLastUser, userDoesNotExist, insertNewUser } from '../../scripts/new_users';
+import { JWTError, QueryError } from '../../types/errors';
 
 router.use(bodyParser.urlencoded({
     extended: true
 }));
 
-
 // Grabs all the users user names from the list
 router.get("/", async (_, res) => {
-    const [err, data] = await handlePromise<string>(db.query("SELECT name, uid, role FROM users;"));
+    const [err, data] = await handlePromise<Array<any> | QueryError>(findAllUsers(DEFAULT_COLUMNS));
     if (err) {
+        if (err === QueryError.NULL) {
+            return res.send({
+                success: false,
+                message: `SERVER ERROR (FAU-NULL)`,
+            })
+
+
+        }
+
         return res.send({
             success: false,
             message: "Failed to grab users",
@@ -34,12 +42,12 @@ router.get("/", async (_, res) => {
 
     res.send({
         success: true,
-        response: data
+        response: data,
     })
 });
 
 router.get("/online", async (_, res) => {
-    const onlineUsers = socketIOServer.onlineUsers; 
+    const onlineUsers = socketIOServer.onlineUsers;
 
     res.send({
         success: true,
@@ -61,36 +69,34 @@ router.get("/id/:id", async (req, res) => {
     }
 
     // Grabs the user by UID from the db
-    const [err, data] = await handlePromise<string>(tryGrabUserByUID(req.params.id));
+    const [err, data] = await handlePromise<any | QueryError>(findUser(DEFAULT_COLUMNS, `uid = ${req.params.id}`));
     if (err) {
+        if (err === QueryError.NORESULT) {
+            return res.send({
+                success: false,
+                message: `No user with the uid: ${req.params.id} exists`,
+            })
+        }
         return res.send({
             success: false,
-            message: `No user with the uid: ${req.params.id} exists`,
+            message: `SERVER ERROR (FU-${err})`,
         })
-    }
-
-    // If the array is empty, then the user index hasn't been created
-    if (Array.isArray(data) && data.length == 0) {
-        return res.send({
-            success: false,
-            message: `No user with the uid: ${req.params.id} exists`,
-        });
     }
 
     // Returns the data assosciated with the index
     res.send({
         success: true,
-        // @ts-ignore
-        response: data[0],
+        response: data,
     });
 });
 
 router.get("/last", async (_, res) => {
-    const [err, data] = await handlePromise<object | string>(tryGrabLastUser());
+    const [err, data] = await handlePromise<object | string>(findLastUser());
     if (err) {
         return res.send({
             success: false,
-            response: err,
+            response: `SERVER ERROR (FLU-${err})`,
+
         })
     }
 
@@ -113,43 +119,45 @@ router.post("/register", cors({ origin: ORIGIN_URL }), async (req, res) => {
     data = data as RegisterData; // Cast here because if it gets through the first function, it must be register data and LSP completions lol 
 
     // Checks if the username isn't already taken
-    let [err, _] = await handlePromise<object | string>(tryCheckIfUserDoesNotExistByName(data.username, ["uid"]))
+    let [err, _] = await handlePromise<any | QueryError>(userDoesNotExist(["uid"], `name LIKE \"${data.username}\"`))
+    console.log(`1: ${err}`);
     if (err) {
-        if (typeof err === "object") {
+        if (Object.values(QueryError).includes(err)) {
             return res.send({
                 success: false,
-                response: "Username is already taken",
+                response: `SERVER ERROR (R-UDNE-${err})`,
             })
         }
 
         return res.send({
             success: false,
-            response: err,
+            response: "Username is already taken",
         })
     }
 
+
     // Checks if the email isn't already taken
-    [err, _] = await handlePromise<object | string>(tryCheckIfUserDoesNotExistByEmail(data.email, ["uid"]))
+    [err, _] = await handlePromise<any | QueryError>(userDoesNotExist(["uid"], `email LIKE \"${data.email}\"`))
     if (err) {
-        if (typeof err === "object") {
+        if (Object.values(QueryError).includes(err)) {
             return res.send({
                 success: false,
-                response: "Email is already taken",
+                response: `SERVER ERROR (R-UDNE-${err})`,
             })
         }
 
         return res.send({
             success: false,
-            response: err,
+            response: "Email is already in use",
         })
     }
 
     // Tries to create the new user
-    [err, _] = await handlePromise<IQueryData | string>(tryCreateNewUser(data))
+    [err, _] = await handlePromise<QueryError | RegisterData>(insertNewUser(data))
     if (err) {
         return res.send({
             success: false,
-            response: err,
+            response: `SERVER ERROR (R-INU-${err})`,
         })
     }
 
@@ -171,27 +179,30 @@ router.post("/login", cors({ origin: ORIGIN_URL }), async (req, res) => {
     }
     data = data as LoginData
 
-    let [err, userData] = await handlePromise<object | string>(tryCheckIfUserExistsByName(data.username, ["name", "uid", "password"]));
+    let [err, userData] = await handlePromise<object | QueryError>(findUser(["name", "uid", "password"], `name LIKE \"${data.username}\"`));
     if (err) {
+        if (err === QueryError.NORESULT) {
+            return res.send({
+                success: false,
+                response: "User does not exist, check your username or register with us"
+            })
+        }
+
         return res.send({
             success: false,
-            response: "User does not exist, check your username or register with us"
+            response: `SERVER ERROR (L-FU-${err})`,
         })
     }
 
-    // Makes sure the user columns exist
-    // @ts-ignore
-    if (typeof userData !== 'object' || !validateKeys(userData, ["password", "uid", "name"])) {
+    if (!userData || typeof userData !== 'object' || !("name" in userData) || !("uid" in userData) || !("password" in userData)) {
         return res.send({
             success: false,
-            response: "Server Error (SLK)",
+            response: `SERVER ERROR (L-OVERIF)`,
         })
     }
 
 
-
-    // @ts-ignore
-    bcrypt.compare(data.password, userData.password).then(match => {
+    bcrypt.compare(data.password, userData.password as string).then(async match => {
         // User and password matched
         if (!match) {
             return res.send({
@@ -207,15 +218,18 @@ router.post("/login", cors({ origin: ORIGIN_URL }), async (req, res) => {
             uid: userData.uid,
         }
 
-        createJWTFromPayload(payload)
-            .then(token => res.send({
-                success: true,
-                response: token,
-            }))
-            .catch(err => res.send({
+        const [errJWT, token] = await handlePromise<JWTError | string>(createJWTFromPayload(payload));
+        if (errJWT) {
+            return res.send({
                 success: false,
-                response: err
-            }));
+                response: `SERVER ERROR (L-${errJWT})`,
+            });
+        }
+
+        return res.send({
+            success: true,
+            response: token,
+        })
     })
 })
 

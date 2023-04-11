@@ -5,7 +5,8 @@ import handlePromise from '../scripts/promiseHandler';
 const socketIo = require('socket.io')
 import jwtDecode from 'jwt-decode'
 import { IJWTPayload } from '../types/auth';
-import { getUserRole } from '../scripts/users';
+import { QueryError } from '../types/errors';
+import { findUser } from '../scripts/new_users';
 
 export class SocketIOServer {
     #server: http.Server;
@@ -48,7 +49,7 @@ export class SocketIOServer {
             return;
         }
 
-        let [err, data] = await handlePromise<object | string>(getUserRole(userDetails.uid));
+        const [err, data] = await handlePromise<any | QueryError>(findUser(["role"], `uid = ${userDetails.uid}`));
 
         if (err) {
             console.log(`${err} // when connecting client from: ${socket.handshake.address}`);

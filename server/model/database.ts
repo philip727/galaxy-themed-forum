@@ -7,7 +7,7 @@ export class Database {
     }
  
     // SQL Query
-    async query(query: string): Promise<any> {
+    async query(query: string): Promise<Array<any>> {
         return new Promise((resolve, reject) => {
             this.pool.query(query, (err: MysqlError, res: any) => {
                 if (err) {

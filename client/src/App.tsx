@@ -19,6 +19,7 @@ import { PrivateWrapper, UnauthorizedWrapper } from './component/Wrappers';
 import socketIOClient from 'socket.io-client'
 import { RootState } from './store';
 import Profile, { profileLoader } from './component/pages/Profile';
+import MyAccount from './component/pages/MyAccount';
 
 function App() {
     const user = useSelector((state: RootState) => state.user.value)
@@ -99,7 +100,7 @@ function App() {
                         </Route>
 
                         <Route element={<PrivateWrapper />}>
-                            <Route path="/account" />
+                            <Route path="/account" element={<MyAccount />} />
                         </Route>
                     </Route>
                 )

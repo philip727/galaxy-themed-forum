@@ -32,3 +32,13 @@ export interface IHomeLoader {
     lastUser: ServerResponse<IPublicRegisterDetails>; 
     onlineUsers: ServerResponse<IPublicUserDetails[]>; 
 }
+
+export enum ProfileSettingsTab {
+    DISPLAY = 100,
+    SECURITY = 150,
+    PRIVACY = 200,
+}
+
+export type SettingsTabs = {
+    [key: string]: ProfileSettingsTab,
+}

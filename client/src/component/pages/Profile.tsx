@@ -1,9 +1,11 @@
 import axios from "axios";
+import { motion } from "framer-motion";
 import { useLoaderData, useParams } from "react-router-dom";
 
 export default function Profile() {
     const loaderData: any = useLoaderData();
     const data = loaderData.data;
+
     const determineClass = (role: string): string => {
         switch (role) {
             case "admin":
@@ -26,9 +28,13 @@ export default function Profile() {
         return `${day}/${month}/${year}`;
     }
 
-
     return (
-        <div className="flex flex-row justify-center items-start mt-20 gap-6">
+        <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-row justify-center items-start mt-20 gap-6"
+        >
             <div className="container w-[50rem] flex flex-col items-start pb-8">
                 <span className="h-[2px] w-full bg-[var(--blue-violet)]" />
                 {data.success && (
@@ -44,7 +50,7 @@ export default function Profile() {
                     </div>
                 )}
             </div>
-        </div>
+        </motion.div>
     )
 }
 

@@ -1,6 +1,7 @@
 import express from 'express';
 import { db } from '../../index';
 import handlePromise from '../../scripts/promiseHandler';
+import { QueryError } from 'sequelize';
 const router = express.Router();
 
 router.get("/fromcategory/:catid", async (req, res) => {
@@ -15,7 +16,7 @@ router.get("/fromcategory/:catid", async (req, res) => {
         });
     }
 
-    const [err, result] = await handlePromise<string>(db.query(`SELECT PID, name, poster_UID FROM posts WHERE parent_CID = ${req.params.catid}`));  
+    const [err, result] = await handlePromise<Array<any> | QueryError>(db.query(`SELECT PID, name, poster_UID FROM posts WHERE parent_CID = ${req.params.catid}`));  
     if (err) {
         return res.send({
             success: false,

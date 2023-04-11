@@ -1,6 +1,7 @@
 import express from 'express';
 import { db } from '../../index';
 import handlePromise from '../../scripts/promiseHandler';
+import { QueryError } from '../../types/errors';
 const router = express.Router();
 
 router.get("/:type", async (req, res) => {
@@ -15,7 +16,7 @@ router.get("/:type", async (req, res) => {
         });
     }
 
-    const [err, result] = await handlePromise<string>(db.query(`SELECT CID, name, description FROM categories WHERE type = \"${req.params.type}\";`));
+    const [err, result] = await handlePromise<Array<any> | QueryError>(db.query(`SELECT CID, name, description FROM categories WHERE type = \"${req.params.type}\";`));
     if (err) {
         console.log(err);
         return res.send({
