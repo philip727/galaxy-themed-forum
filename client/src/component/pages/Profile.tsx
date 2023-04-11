@@ -1,6 +1,7 @@
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useLoaderData, useParams } from "react-router-dom";
+import { DEFAULT_PFP, SERVER_URL } from "../../scripts/config";
 
 export default function Profile() {
     const loaderData: any = useLoaderData();
@@ -28,6 +29,14 @@ export default function Profile() {
         return `${day}/${month}/${year}`;
     }
 
+    const getPfp = (): string => {
+        return data.response.pfpdestination
+            ? SERVER_URL + data.response.pfpdestination
+            : DEFAULT_PFP;
+    }
+
+    console.log(data.response.pfpdestination);
+
     return (
         <motion.div 
             initial={{ opacity: 0 }}
@@ -39,7 +48,7 @@ export default function Profile() {
                 <span className="h-[2px] w-full bg-[var(--blue-violet)]" />
                 {data.success && (
                     <div className="flex flex-row mt-8 ml-8">
-                        <img className="h-32 w-32 rounded-[50%]" src="/images/default-pfp.jpg" />
+                        <img className="h-32 w-32 rounded-[50%]" src={getPfp()} />
                         <div className="flex flex-col ml-4">
                             <p className="font-extrabold text-4xl">{data.response.name}</p>
                             <p className={`${determineClass(data.response.role as string)} text-2xl`}>{data.response.role}</p>

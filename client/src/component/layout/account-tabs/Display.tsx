@@ -18,7 +18,7 @@ export default function Display() {
             headers: {
                 "Access-Control-Allow-Origin": "*",
             },
-            url: "/api/user/uploadpfp",
+            url: "/api/account/uploadpfp",
             data: formData,
         })
     }

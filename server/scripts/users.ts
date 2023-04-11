@@ -26,7 +26,7 @@ export const findUser = (columns: string[], condition: string): Promise<any | Qu
 
 export const findAllUsers = (columns: string[]): Promise<Array<any> | QueryError> => {
     return new Promise(async (resolve, reject) => {
-        const [err, result] = await handlePromise<Array<any>>(db.query(`SELECT ${columns.toString()} FROM users;`));   
+        const [err, result] = await handlePromise<Array<any>>(db.query(`SELECT ${columns.toString()} FROM users;`));
         if (err || !result) {
             return reject(QueryError.NULL);
         }
@@ -34,7 +34,7 @@ export const findAllUsers = (columns: string[]): Promise<Array<any> | QueryError
         if (Array.isArray(result) && result.length == 0) {
             return reject(QueryError.NORESULT);
         }
-        
+
         return resolve(result);
     })
 }
@@ -96,7 +96,7 @@ export const insertNewUser = (data: RegisterData): Promise<RegisterData | QueryE
                 db.query(`INSERT INTO users (name, email, password, role) VALUES (\"${data.username}\", \"${data.email}\", \"${hash}\", \"user\")`));
 
             if (err) {
-                return reject(QueryError.INSERTIONERROR);
+                return reject(QueryError.INSERTIONFAILED);
             }
 
             console.log(`Created new user ${data.username} / ${hash} / ${data.email}`);
@@ -106,9 +106,15 @@ export const insertNewUser = (data: RegisterData): Promise<RegisterData | QueryE
     })
 }
 
-export const setUserProfilePicture = (uid: number, destination: string) => {
+export const setUserProfilePicture = (uid: number, destination: string): Promise<string | QueryError>  => {
     return new Promise(async (resolve, reject) => {
+        const [err, _] = await handlePromise<Array<any>>(
+            db.query(`UPDATE users SET pfpdestination = \"${destination}\" WHERE uid = ${uid};`));
 
+        if (err) {
+            return reject(QueryError.UPDATEFAILED);
+        }
 
+        resolve("Succesfully updated profile picture");
     })
 }

@@ -43,9 +43,8 @@ export const validateEmail = (email: string): [boolean, string] => {
     return [true, ""];
 }
 
-// Validates the register data
+// Makes sure the register data meets what is needed
 export const validateRegisterData = (data: any): [boolean, any] => {
-    // Make sure the data is an object
     if (!data || !(typeof data == "object")) {
         return [false, "Failed to receive data from client, try refreshing"]
     };
@@ -80,7 +79,8 @@ export const validateRegisterData = (data: any): [boolean, any] => {
     return [true, data]
 }
 
-export const validateLoginData = (data: any): [boolean, any] => { // Make sure the data is an object 
+// Makes sure the login data meets the requirements
+export const validateLoginData = (data: any): [boolean, any] => { 
     if (!data || !(typeof data == "object")) {
         return [false, "Failed to receive data from client, try refreshing"] 
     }
