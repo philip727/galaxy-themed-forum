@@ -34,7 +34,7 @@ export interface IHomeLoader {
 }
 
 export enum ProfileSettingsTab {
-    DISPLAY = 100,
+    PROFILE = 100,
     SECURITY = 150,
     PRIVACY = 200,
 }

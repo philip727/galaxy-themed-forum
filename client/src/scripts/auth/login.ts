@@ -9,6 +9,8 @@ import handlePromise from "../promiseHandler";
 import { setAuthTokenHeader } from "./headers";
 import store from '../../store'
 import { updateUser } from "../../reducers/user";
+import { getUserByUID } from "../api/users";
+import { createNotification } from "../layout/notificationManager";
 
 
 // Updates the auth items using the jwt
@@ -107,5 +109,36 @@ export const jwtLogin = async (jwt: string, update?: boolean) => {
         return;
     }
 
-    store.dispatch(updateUser({ username: userDetails.username, uid: userDetails.uid }));
+    const [err2, res2] = await handlePromise<AxiosResponse<any, any>>(getUserByUID(userDetails.uid));
+    if (err2) {
+        createNotification({
+            text: err2.data.response,
+        })
+        return;
+    }
+
+    if (!res2) {
+        createNotification({
+            text: "SERVER ERROR (CJL-JD)",
+        })
+        return;
+    }
+
+    const data = res2.data;
+
+    if (!data || !("success" in data) || !("response" in data)) {
+        createNotification({
+            text: "SERVER ERROR (CJL-JD-R)",
+        })
+        return;
+    }
+
+    if (!data.success) {
+        createNotification({
+            text: data.response,
+        })
+        return;
+    }
+
+    store.dispatch(updateUser({ username: userDetails.username, uid: userDetails.uid, role: data.response.role, regdate: data.response.regdate }));
 }

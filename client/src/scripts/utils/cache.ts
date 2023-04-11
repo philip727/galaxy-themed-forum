@@ -14,7 +14,6 @@ export const updateCacheFromUser = async (uid: number) => {
         return;
     }
     const data = result.data;
-    console.log(data.response);
 
     store.dispatch(updateCache({ pfp: data.response.pfpdestination }));
 }

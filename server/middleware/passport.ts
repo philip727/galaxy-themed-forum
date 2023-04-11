@@ -3,7 +3,7 @@ import handlePromise from "../scripts/promiseHandler";
 import jwtDecode from 'jwt-decode'
 
 const passport = async (req: any, res: any, next: any) => {
-    const [err, result] = await handlePromise<string>(verifyJWTToken(req.headers.authorization));
+    const [err, _] = await handlePromise<string>(verifyJWTToken(req.headers.authorization));
     if (err) {
         return res.send({
             success: false,

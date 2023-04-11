@@ -7,14 +7,14 @@ import SectionHeader from "../extras/SectionHeader";
 import Display from "../layout/account-tabs/Display";
 
 const tabs: SettingsTabs = {
-    "Display": ProfileSettingsTab.DISPLAY,
+    "Profile": ProfileSettingsTab.PROFILE,
     "Security": ProfileSettingsTab.SECURITY,
     "Privacy": ProfileSettingsTab.PRIVACY,
 }
 
 export default function MyAccount() {
     const user = useSelector((state: RootState) => state.user.value)
-    const [tab, setTab] = useState(ProfileSettingsTab.DISPLAY);
+    const [tab, setTab] = useState(ProfileSettingsTab.PROFILE);
 
     return (
         <motion.div
@@ -43,8 +43,8 @@ export default function MyAccount() {
                         </p>
                     ))}
                 </div>
-                <div className="pl-5">
-                    {tab == ProfileSettingsTab.DISPLAY && (
+                <div className="px-5 w-3/4">
+                    {tab == ProfileSettingsTab.PROFILE && (
                         <Display />
                     )}
                 </div>
