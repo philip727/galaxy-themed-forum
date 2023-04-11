@@ -1,18 +1,15 @@
-import axios, { AxiosResponse } from 'axios'
-import { ChangeEvent, useEffect, useRef } from "react";
-import { isLoginDataValid, updateAuthWithJWTToken } from '../../scripts/auth/login';
+import { AxiosResponse } from 'axios'
+import { ChangeEvent, useRef } from "react";
+import { isLoginDataValid, jwtLogin, updateAuthWithJWTToken } from '../../scripts/auth/login';
 import { IDetailsToLogin } from "../../types/user";
 import InputField from "../inputs/InputField"
 import ShineButton from "../inputs/ShineButton"
-import jwtDecode from 'jwt-decode'
-import { IJWTInfo } from '../../types/auth';
 import { createModal } from '../../scripts/layout/modalManager';
 import { createNotification } from '../../scripts/layout/notificationManager';
 import { motion } from 'framer-motion';
 import { ModalFunctionTypes } from '../../types/layout';
 import handlePromise from '../../scripts/promiseHandler';
-import { useDispatch } from 'react-redux';
-import { updateUser } from '../../reducers/user';
+import { loginAsUser } from '../../scripts/api/users';
 
 const animationVariants = {
     hide: {
@@ -24,35 +21,11 @@ const animationVariants = {
 }
 
 export default function Login() {
-    const dispatch = useDispatch();
     const loginData = useRef<IDetailsToLogin>({
         username: "",
         password: "",
     });
 
-    // Logs in with the jwt token
-    const jwtLogin = async (jwt: string) => {
-        // Verifies the jwt with the server
-        const [err, res] = await handlePromise<string>(updateAuthWithJWTToken(jwt, true));
-        if (err) {
-            // Creates a prompt with the error message
-            createModal({
-                header: "Login",
-                subtext: err,
-                buttons: [
-                    {
-                        text: "Ok",
-                        fn: ModalFunctionTypes.CLOSE,
-                    }
-                ]
-            })
-            return;
-        }
-
-        const userDetails = jwtDecode(res as string) as IJWTInfo;
-
-        dispatch(updateUser({ username: userDetails.username, uid: userDetails.uid }));
-    }
 
     const login = async () => {
         // Client side checks
@@ -68,7 +41,7 @@ export default function Login() {
         }
 
         // Requests to login with the login data, will return a jwt so we can login on the client
-        const [err, res] = await handlePromise<AxiosResponse<any, any>>(loginRequest(loginData.current.username, loginData.current.password));
+        const [err, res] = await handlePromise<AxiosResponse<any, any>>(loginAsUser(loginData.current.username, loginData.current.password));
         if (err) {
             console.log(err);
             return;
@@ -91,7 +64,7 @@ export default function Login() {
             return;
         }
 
-        jwtLogin(data.response);
+        jwtLogin(data.response, true);
     }
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -122,20 +95,4 @@ export default function Login() {
             </div>
         </motion.div>
     )
-}
-
-const loginRequest = (username: string, password: string) => {
-    return axios.request({
-        method: 'POST',
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
-        url: "/api/user/login",
-        data: {
-            username: username,
-            password: password,
-        },
-    })
-
 }

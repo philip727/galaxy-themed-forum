@@ -5,19 +5,18 @@ import { QueryError } from '../../types/errors';
 import passport from '../../middleware/passport';
 import { IJWTPayload } from '../../types/auth';
 
-const cors = require('cors');
-const bodyParser = require('body-parser');
+import bodyParser from 'body-parser';
 import express from 'express';
 import { PROFILE_PICTURE_FOLDER } from '../../config';
 import handlePromise from '../../scripts/promiseHandler';
-import { setUserProfilePicture } from '../../scripts/users';
+import { clearUserProfilePicture, setUserProfilePicture } from '../../scripts/users';
 const router = express.Router();
 
 router.use(bodyParser.urlencoded({
     extended: true
 }));
 
-router.post('/uploadpfp', passport, async (req, res) => {
+router.post('/uploadpfp', passport, async (req: any, res: any) => {
 
     // Creates the upload directory for the files
     const form = formidable({
@@ -36,7 +35,7 @@ router.post('/uploadpfp', passport, async (req, res) => {
 
     const jwtPayload = req.jwtPayload as IJWTPayload;
 
-    form.parse(req, async (err, fields, files) => {
+    form.parse(req, async (err, _, files) => {
         // Makes sure we have an avatar from the form
         if (err || !files.avatar || typeof files.avatar === 'undefined') {
             return res.send({
@@ -92,6 +91,33 @@ router.post('/uploadpfp', passport, async (req, res) => {
 
     })
 
+})
+
+router.put('/clearpfp', passport, async (req: any, res: any) => {
+    // Makes sure there is a jwtpayload from the passport
+    if (!("jwtPayload" in req)) {
+        return res.send({
+            success: false,
+            response: "SERVER ERROR (UPFP-JP)",
+        });
+    }
+
+    const jwtPayload = req.jwtPayload as IJWTPayload;
+
+    const [err, _] = await handlePromise<QueryError | string>(
+        clearUserProfilePicture(jwtPayload.uid));
+
+    if (err) {
+        return res.send({
+            success: false,
+            response: `SERVER ERROR (UPFP-CUPP-${err})`,
+        });
+    }
+
+    res.send({
+        success: true,
+        response: "Succesfully uploaded new profile picture",
+    });
 })
 
 export default router;

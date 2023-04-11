@@ -1,8 +1,14 @@
 import axios, { AxiosResponse } from "axios";
+import jwtDecode from "jwt-decode";
+import { IJWTInfo } from "../../types/auth";
+import { ModalFunctionTypes } from "../../types/layout";
 import { IDetailsToLogin } from "../../types/user";
 import { LOGIN_TOKEN_NAME } from "../config";
+import { createModal } from "../layout/modalManager";
 import handlePromise from "../promiseHandler";
 import { setAuthTokenHeader } from "./headers";
+import store from '../../store'
+import { updateUser } from "../../reducers/user";
 
 
 // Updates the auth items using the jwt
@@ -72,4 +78,34 @@ export const isLoginDataValid = (loginData: IDetailsToLogin): [boolean, string] 
     }
 
     return [true, ""];
+}
+
+export const jwtLogin = async (jwt: string, update?: boolean) => {
+    // Verifies the jwt with the server
+    const [err, res] = await handlePromise<string>(updateAuthWithJWTToken(jwt, update));
+    if (err) {
+        // Creates a prompt if with the error message
+        createModal({
+            header: "Login",
+            subtext: err,
+            buttons: [
+                {
+                    text: "Ok",
+                    fn: ModalFunctionTypes.CLOSE,
+                }
+            ]
+        });
+        return;
+    }
+
+    const userDetails = jwtDecode(res as string) as IJWTInfo;
+
+    // If it's been X time then delete the cookie
+    const currentTime = Date.now() / 1000;
+    if (userDetails.exp < currentTime) {
+        deleteJWTCookie();
+        return;
+    }
+
+    store.dispatch(updateUser({ username: userDetails.username, uid: userDetails.uid }));
 }

@@ -1,7 +1,7 @@
-import axios from "axios";
 import { motion } from "framer-motion";
-import { useLoaderData, useParams } from "react-router-dom";
-import { DEFAULT_PFP, SERVER_URL } from "../../scripts/config";
+import { useLoaderData } from "react-router-dom";
+import { getUserByUID } from "../../scripts/api/users";
+import { formatDate, getPfp } from "../../scripts/layout/profile";
 
 export default function Profile() {
     const loaderData: any = useLoaderData();
@@ -16,29 +16,9 @@ export default function Profile() {
         }
         return "font-bold text-[var(--floral-white)]"
     }
-    
-    const formatDate = (sqlDate: string): string => {
-        const americanDate = sqlDate.split("T")[0];
-        const americanArr = americanDate.split("-"); 
-        
-        const day = americanArr[2];
-        const month = americanArr[1];
-        const year = americanArr[0]
-
-
-        return `${day}/${month}/${year}`;
-    }
-
-    const getPfp = (): string => {
-        return data.response.pfpdestination
-            ? SERVER_URL + data.response.pfpdestination
-            : DEFAULT_PFP;
-    }
-
-    console.log(data.response.pfpdestination);
 
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
@@ -48,7 +28,7 @@ export default function Profile() {
                 <span className="h-[2px] w-full bg-[var(--blue-violet)]" />
                 {data.success && (
                     <div className="flex flex-row mt-8 ml-8">
-                        <img className="h-32 w-32 rounded-[50%]" src={getPfp()} />
+                        <img className="h-32 w-32 rounded-[50%]" src={getPfp(data.response.pfpdestination)} />
                         <div className="flex flex-col ml-4">
                             <p className="font-extrabold text-4xl">{data.response.name}</p>
                             <p className={`${determineClass(data.response.role as string)} text-2xl`}>{data.response.role}</p>
@@ -64,8 +44,5 @@ export default function Profile() {
 }
 
 export const profileLoader = ({ params }: { params: any }) => {
-    return axios.request({
-        url: `/api/user/id/${params.id}`,
-        method: "GET",
-    })
+    return getUserByUID(params.id);
 }

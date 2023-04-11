@@ -8,7 +8,7 @@ export function PrivateWrapper() {
     return isAuthenticated ? <Outlet /> : <Navigate to="/login" />
 }
 
-export function UnauthorizedWrapper() {
+export function UnAuthorizedWrapper() {
     const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticed)
 
     return !isAuthenticated ? <Outlet /> : <Navigate to="/" />

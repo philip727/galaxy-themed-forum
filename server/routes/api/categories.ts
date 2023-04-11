@@ -18,7 +18,6 @@ router.get("/:type", async (req, res) => {
 
     const [err, result] = await handlePromise<Array<any> | QueryError>(db.query(`SELECT CID, name, description FROM categories WHERE type = \"${req.params.type}\";`));
     if (err) {
-        console.log(err);
         return res.send({
             success: false,
             response: "Server Error (SGC)",

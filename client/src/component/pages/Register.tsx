@@ -1,7 +1,8 @@
-import axios, { AxiosResponse } from 'axios'
+import { AxiosResponse } from 'axios'
 import { motion } from 'framer-motion';
-import { ChangeEvent, useEffect, useRef } from 'react';
+import { ChangeEvent, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createUser } from '../../scripts/api/users';
 import { isRegisterDataValid } from '../../scripts/auth/register';
 import { createModal, destroyModal } from '../../scripts/layout/modalManager';
 import { createNotification } from '../../scripts/layout/notificationManager';
@@ -42,7 +43,7 @@ export default function Register() {
         }
 
         // Post to register
-        const [err, res] = await handlePromise<AxiosResponse<any, any>>(requestRegister(registerData.current));
+        const [err, res] = await handlePromise<AxiosResponse<any, any>>(createUser(registerData.current));
         if (err) {
             // Server error prompt if it can't make the request
             createModal({
@@ -110,18 +111,3 @@ export default function Register() {
     );
 }
 
-const requestRegister = (details: IDetailsToRegister) => {
-    return axios.request({
-        method: 'POST',
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
-        url: "/api/user/register",
-        data: {
-            username: details.username,
-            email: details.email,
-            password: details.password,
-        },
-    })
-}

@@ -118,3 +118,16 @@ export const setUserProfilePicture = (uid: number, destination: string): Promise
         resolve("Succesfully updated profile picture");
     })
 }
+
+export const clearUserProfilePicture = (uid: number): Promise<string | QueryError>  => {
+    return new Promise(async (resolve, reject) => {
+        const [err, _] = await handlePromise<Array<any>>(
+            db.query(`UPDATE users SET pfpdestination = NULL WHERE uid = ${uid};`));
+
+        if (err) {
+            return reject(QueryError.UPDATEFAILED);
+        }
+
+        resolve("Succesfully updated profile picture");
+    })
+}

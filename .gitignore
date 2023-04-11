@@ -245,5 +245,5 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/react,windows,linux,macos,node
 
 # For the server
-public/profiles/*
-!public/profiles/.gitkeep
+server/public/profiles/*
+!server/public/profiles/.gitkeep

@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./reducers/user";
+import cacheReducer from "./reducers/cache";
 
 const store = configureStore({
     reducer: {
         user: userReducer,
+        cache: cacheReducer,
     },
 })
 
