@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { JWT_KEY } from '../config';
-import { IJWTPayload, IJWTToken } from "../types/auth"
+import { IJWTPayload } from "../types/auth"
 import { JWTError } from '../types/errors';
 
 export const createJWTFromPayload = (payload: IJWTPayload): Promise<string | JWTError> => {
@@ -18,7 +18,7 @@ export const verifyJWTToken = (jwtToken: string): Promise<string> => {
     return new Promise((resolve, reject) => {
         try {
             const jwtTokenParsed = jwtToken.split("Bearer ")[1];
-            const _ = jwt.verify(jwtTokenParsed, JWT_KEY)
+            jwt.verify(jwtTokenParsed, JWT_KEY);
             resolve(jwtToken)
         } catch (_) {
             reject(JWTError.VERIFICATIONFAILED)

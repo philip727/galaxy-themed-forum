@@ -5,17 +5,19 @@ import { IQueryData, LoginData, RegisterData } from '../../types/users';
 
 const cors = require('cors');
 const bodyParser = require('body-parser');
-import { ORIGIN_URL } from '../../config';
-
-// Encryption Imports
+import { DEFAULT_COLUMNS, ORIGIN_URL } from '../../config';
 import bcrypt from 'bcrypt'
-
-// Validation imports
 import { validateLoginData, validateRegisterData } from '../../validation/users';
 import handlePromise from '../../scripts/promiseHandler';
 import { createJWTFromPayload } from '../../scripts/auth';
-import { DEFAULT_COLUMNS, findAllUsers, findUser, findLastUser, userDoesNotExist, insertNewUser } from '../../scripts/new_users';
+import { findAllUsers, findUser, findLastUser, userDoesNotExist, insertNewUser } from '../../scripts/users';
 import { JWTError, QueryError } from '../../types/errors';
+
+const multer = require('multer');
+const upload = multer({ 
+    dest: 'uploads',
+    fileSize: 8 * 1024 * 1024,
+});
 
 router.use(bodyParser.urlencoded({
     extended: true
@@ -30,8 +32,6 @@ router.get("/", async (_, res) => {
                 success: false,
                 message: `SERVER ERROR (FAU-NULL)`,
             })
-
-
         }
 
         return res.send({
@@ -64,7 +64,7 @@ router.get("/id/:id", async (req, res) => {
         console.log(`${req.headers['x-forwarded-for'] || req.socket.remoteAddress} `);
         return res.send({
             success: false,
-            message: "Invalid UID",
+            response: "Invalid UID",
         });
     }
 
@@ -74,12 +74,12 @@ router.get("/id/:id", async (req, res) => {
         if (err === QueryError.NORESULT) {
             return res.send({
                 success: false,
-                message: `No user with the uid: ${req.params.id} exists`,
+                response: `No user with the uid: ${req.params.id} exists`,
             })
         }
         return res.send({
             success: false,
-            message: `SERVER ERROR (FU-${err})`,
+            response: `SERVER ERROR (FU-${err})`,
         })
     }
 
@@ -120,7 +120,6 @@ router.post("/register", cors({ origin: ORIGIN_URL }), async (req, res) => {
 
     // Checks if the username isn't already taken
     let [err, _] = await handlePromise<any | QueryError>(userDoesNotExist(["uid"], `name LIKE \"${data.username}\"`))
-    console.log(`1: ${err}`);
     if (err) {
         if (Object.values(QueryError).includes(err)) {
             return res.send({
@@ -179,7 +178,7 @@ router.post("/login", cors({ origin: ORIGIN_URL }), async (req, res) => {
     }
     data = data as LoginData
 
-    let [err, userData] = await handlePromise<object | QueryError>(findUser(["name", "uid", "password"], `name LIKE \"${data.username}\"`));
+    let [err, userData] = await handlePromise<any | QueryError>(findUser(["name", "uid", "password"], `name LIKE \"${data.username}\"`));
     if (err) {
         if (err === QueryError.NORESULT) {
             return res.send({
@@ -212,9 +211,7 @@ router.post("/login", cors({ origin: ORIGIN_URL }), async (req, res) => {
         }
 
         const payload = {
-            // @ts-ignore
             username: userData.name,
-            // @ts-ignore
             uid: userData.uid,
         }
 
@@ -226,11 +223,17 @@ router.post("/login", cors({ origin: ORIGIN_URL }), async (req, res) => {
             });
         }
 
-        return res.send({
+        res.send({
             success: true,
             response: token,
         })
     })
+})
+
+router.post('/uploadpfp', upload.single('avatar'), async (req, res) => {
+    console.log(req);
+
+    res.send({});
 })
 
 export default router;

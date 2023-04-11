@@ -30,7 +30,7 @@ router.post('/verify/jwt', cors({ origin: ORIGIN_URL }) , async (req, res) => {
     if (err) {
         return res.send({
             success: false,
-            response: err
+            response: "Failed to verify session token"
         });
     }
 

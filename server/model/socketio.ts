@@ -6,7 +6,7 @@ const socketIo = require('socket.io')
 import jwtDecode from 'jwt-decode'
 import { IJWTPayload } from '../types/auth';
 import { QueryError } from '../types/errors';
-import { findUser } from '../scripts/new_users';
+import { findUser } from '../scripts/users';
 
 export class SocketIOServer {
     #server: http.Server;
