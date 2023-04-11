@@ -1,23 +1,29 @@
 import express from 'express';
 const router = express.Router();
-import { db, socketIOServer } from '../../index';
-import { IQueryData, LoginData, RegisterData } from '../../types/users';
+import { socketIOServer } from '../../index';
+import { IUploadedFile, LoginData, RegisterData } from '../../types/users';
 
 const cors = require('cors');
 const bodyParser = require('body-parser');
-import { DEFAULT_COLUMNS, ORIGIN_URL } from '../../config';
+import { DEFAULT_COLUMNS, ORIGIN_URL, PROFILE_PICTURE_FOLDER } from '../../config';
 import bcrypt from 'bcrypt'
 import { validateLoginData, validateRegisterData } from '../../validation/users';
 import handlePromise from '../../scripts/promiseHandler';
 import { createJWTFromPayload } from '../../scripts/auth';
-import { findAllUsers, findUser, findLastUser, userDoesNotExist, insertNewUser } from '../../scripts/users';
-import { JWTError, QueryError } from '../../types/errors';
+import {
+    findAllUsers,
+    findUser,
+    findLastUser,
+    userDoesNotExist,
+    insertNewUser
+} from '../../scripts/users';
 
-const multer = require('multer');
-const upload = multer({ 
-    dest: 'uploads',
-    fileSize: 8 * 1024 * 1024,
-});
+import path from 'path'
+import formidable from 'formidable';
+import fs from 'fs';
+import { JWTError, QueryError } from '../../types/errors';
+import { passport } from '../../validation/passport';
+import { IJWTPayload } from '../../types/auth';
 
 router.use(bodyParser.urlencoded({
     extended: true
@@ -25,7 +31,9 @@ router.use(bodyParser.urlencoded({
 
 // Grabs all the users user names from the list
 router.get("/", async (_, res) => {
-    const [err, data] = await handlePromise<Array<any> | QueryError>(findAllUsers(DEFAULT_COLUMNS));
+    const [err, data] = await handlePromise<Array<any> | QueryError>
+        (findAllUsers(DEFAULT_COLUMNS));
+
     if (err) {
         if (err === QueryError.NULL) {
             return res.send({
@@ -69,7 +77,9 @@ router.get("/id/:id", async (req, res) => {
     }
 
     // Grabs the user by UID from the db
-    const [err, data] = await handlePromise<any | QueryError>(findUser(DEFAULT_COLUMNS, `uid = ${req.params.id}`));
+    const [err, data] = await handlePromise<any | QueryError>(
+        findUser(DEFAULT_COLUMNS, `uid = ${req.params.id}`));
+
     if (err) {
         if (err === QueryError.NORESULT) {
             return res.send({
@@ -116,10 +126,12 @@ router.post("/register", cors({ origin: ORIGIN_URL }), async (req, res) => {
             response: message,
         })
     }
-    data = data as RegisterData; // Cast here because if it gets through the first function, it must be register data and LSP completions lol 
+    data = data as RegisterData;
 
     // Checks if the username isn't already taken
-    let [err, _] = await handlePromise<any | QueryError>(userDoesNotExist(["uid"], `name LIKE \"${data.username}\"`))
+    let [err, _] = await handlePromise<any | QueryError>(
+        userDoesNotExist(["uid"], `name LIKE \"${data.username}\"`))
+
     if (err) {
         if (Object.values(QueryError).includes(err)) {
             return res.send({
@@ -136,7 +148,9 @@ router.post("/register", cors({ origin: ORIGIN_URL }), async (req, res) => {
 
 
     // Checks if the email isn't already taken
-    [err, _] = await handlePromise<any | QueryError>(userDoesNotExist(["uid"], `email LIKE \"${data.email}\"`))
+    [err, _] = await handlePromise<any | QueryError>(
+        userDoesNotExist(["uid"], `email LIKE \"${data.email}\"`))
+
     if (err) {
         if (Object.values(QueryError).includes(err)) {
             return res.send({
@@ -178,7 +192,9 @@ router.post("/login", cors({ origin: ORIGIN_URL }), async (req, res) => {
     }
     data = data as LoginData
 
-    let [err, userData] = await handlePromise<any | QueryError>(findUser(["name", "uid", "password"], `name LIKE \"${data.username}\"`));
+    let [err, userData] = await handlePromise<any | QueryError>(
+        findUser(["name", "uid", "password"], `name LIKE \"${data.username}\"`));
+
     if (err) {
         if (err === QueryError.NORESULT) {
             return res.send({
@@ -193,7 +209,8 @@ router.post("/login", cors({ origin: ORIGIN_URL }), async (req, res) => {
         })
     }
 
-    if (!userData || typeof userData !== 'object' || !("name" in userData) || !("uid" in userData) || !("password" in userData)) {
+    if (!userData || typeof userData !== 'object' || !("name" in userData)
+        || !("uid" in userData) || !("password" in userData)) {
         return res.send({
             success: false,
             response: `SERVER ERROR (L-OVERIF)`,
@@ -201,39 +218,96 @@ router.post("/login", cors({ origin: ORIGIN_URL }), async (req, res) => {
     }
 
 
-    bcrypt.compare(data.password, userData.password as string).then(async match => {
-        // User and password matched
-        if (!match) {
-            return res.send({
-                success: false,
-                response: "Incorrect Password",
+    bcrypt.compare(data.password, userData.password as string)
+        .then(async match => {
+            // User and password matched
+            if (!match) {
+                return res.send({
+                    success: false,
+                    response: "Incorrect Password",
+                })
+            }
+
+            const payload = {
+                username: userData.name,
+                uid: userData.uid,
+            }
+
+            const [errJWT, token] = await handlePromise<JWTError | string>(
+                createJWTFromPayload(payload));
+
+            if (errJWT) {
+                return res.send({
+                    success: false,
+                    response: `SERVER ERROR (L-${errJWT})`,
+                });
+            }
+
+            res.send({
+                success: true,
+                response: token,
             })
-        }
+        })
+})
 
-        const payload = {
-            username: userData.name,
-            uid: userData.uid,
-        }
+router.post('/uploadpfp', passport, async (req, res) => {
+    console.log(req.headers.authorization);
 
-        const [errJWT, token] = await handlePromise<JWTError | string>(createJWTFromPayload(payload));
-        if (errJWT) {
+    const form = formidable({
+        multiples: false,
+        maxFileSize: 8 * 1024 * 1024,
+        uploadDir: PROFILE_PICTURE_FOLDER
+    });
+
+    if (!("jwtPayload" in req)) {
+        return res.send({
+            success: false,
+            response: "SERVER ERROR (UPFP-JP)",
+        });
+    }
+
+    const jwtPayload = req.jwtPayload as IJWTPayload;
+
+    form.parse(req, (err, fields, files) => {
+        if (err || !files.avatar || typeof files.avatar === 'undefined') {
+            console.log(err);
             return res.send({
                 success: false,
-                response: `SERVER ERROR (L-${errJWT})`,
+                response: "Failed to upload profile picture",
+            });
+        }
+
+        if (Array.isArray(files.avatar)) {
+            return res.send({
+                success: false,
+                response: "Can't upload multiple profile pictures",
+            });
+        }
+
+        const file = files.avatar;
+
+        try {
+            if (!file.originalFilename) {
+                return res.send({
+                    success: false,
+                    response: "SERVER ERROR (UPFP-OF)",
+                });
+            }
+            const ext = path.extname(file.originalFilename);
+            fs.renameSync(file.filepath, path.join(PROFILE_PICTURE_FOLDER, `${jwtPayload.uid}${ext}`));
+        } catch {
+            return res.send({
+                success: false,
+                response: "SERVER ERROR (UPFP-RN)",
             });
         }
 
         res.send({
             success: true,
-            response: token,
-        })
+            response: "Succesfully uploaded new profile picture",
+        });
     })
-})
 
-router.post('/uploadpfp', upload.single('avatar'), async (req, res) => {
-    console.log(req);
-
-    res.send({});
 })
 
 export default router;

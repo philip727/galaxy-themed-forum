@@ -5,18 +5,18 @@ export default function Display() {
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
 
-        if (!e.target || !e.target.value) {
+        if (!e.target || !e.target.files) {
             return;
         }
 
+
         let formData = new FormData();
-        formData.append('avatar', e.target.value);
+        formData.append('avatar', e.target.files[0]);
 
         axios.request({
             method: 'POST',
             headers: {
                 "Access-Control-Allow-Origin": "*",
-                "Content-Type": "multipart/form-data",
             },
             url: "/api/user/uploadpfp",
             data: formData,

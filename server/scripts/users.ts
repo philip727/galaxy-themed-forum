@@ -105,3 +105,10 @@ export const insertNewUser = (data: RegisterData): Promise<RegisterData | QueryE
         })
     })
 }
+
+export const setUserProfilePicture = (uid: number, destination: string) => {
+    return new Promise(async (resolve, reject) => {
+
+
+    })
+}
