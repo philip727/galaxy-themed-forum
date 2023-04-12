@@ -188,9 +188,10 @@ export const createNewCommentOnProfile = (profileId: string, posterId: number, c
 }
 
 export const deleteCommentOnProfile = (posterId: number, commentId: string): Promise<string | QueryError> => {
+    console.log(posterId, commentId);
     return new Promise(async (resolve, reject) => {
         const [err, _] = await handlePromise<Array<any>>(
-            db.query(`DELETE FROM profile_comments WHERE profile_id = ${posterId} AND id = ${commentId};`));
+            db.query(`DELETE FROM profile_comments WHERE poster_id = ${posterId} AND id = ${commentId};`));
 
         if (err) {
             return reject(QueryError.DELETEFAILED);

@@ -129,36 +129,34 @@ export default function Profile() {
                             placeholder="Add comment.."
                             className="mt-2 w-full h-20 min-h-[5rem] pl-1 mb-3 inset-shadow bg-[var(--dark-jet)] resize-none"
                         />
-                        <div className="flex justify-end w-full">
-                            {postComment.length > 0 && (
+                        {postComment.length > 0 && (
+                            <div className="flex justify-end w-full">
                                 <ShineButton onClick={postCommentOnProfile}>
                                     <p className="text-xl font-medium">Post</p>
                                 </ShineButton>
-                            )}
-                        </div>
-                        <div className="w-full mt-2 min-h-[5rem] flex flex-col-reverse">
-                            {userComments.success && (
-                                <>
-                                    {userComments.response.map((comment: any, index: any) => (
-                                        <div key={index} className="w-full py-2 flex flex-row relative">
-                                            <img className="h-16 w-16 rounded-[50%] ml-2" src={getPfp(comment.pfpdestination)} />
-                                            <div className="pl-3 flex flex-col items-start justify-start">
-                                                <div className="flex flex-row justify-center items-center">
-                                                    <UserContainer className="text-2xl" user={{ uid: comment.poster_id, name: comment.poster_name, role: comment.poster_role }} />
-                                                    <p className="text-lg ml-2 mt-1"> - {formatDate(comment.post_date)}</p>
-                                                </div>
-                                                <p className="text-md">{comment.content}</p>
+                            </div>
+                        )}
+                        {userComments.success && (
+                            <div className="w-full mt-2 flex flex-col-reverse">
+                                {userComments.response.map((comment: any, index: any) => (
+                                    <div key={index} className="w-full py-2 flex flex-row relative">
+                                        <img className="h-16 w-16 rounded-[50%] ml-2" src={getPfp(comment.pfpdestination)} />
+                                        <div className="pl-3 flex flex-col items-start justify-start">
+                                            <div className="flex flex-row justify-center items-center">
+                                                <UserContainer className="text-2xl" user={{ uid: comment.poster_id, name: comment.poster_name, role: comment.poster_role }} />
+                                                <p className="text-lg ml-2 mt-1"> - {formatDate(comment.post_date)}</p>
                                             </div>
-                                            {comment.poster_id == user.uid && (
-                                                <ShineButton onClick={() => { deleteCommentOnProfile(comment.id) }} className="!px-2 absolute top-2 right-0">
-                                                    <img className="w-8 h-8" src={`${window.location.origin}/images/trashcan-white.svg`}/>
-                                                </ShineButton>
-                                            )}
+                                            <p className="text-md">{comment.content}</p>
                                         </div>
-                                    ))}
-                                </>
-                            )}
-                        </div>
+                                        {comment.poster_id == user.uid && (
+                                            <ShineButton onClick={() => { deleteCommentOnProfile(comment.id) }} className="!px-2 absolute top-2 right-0">
+                                                <img className="w-8 h-8" src={`${window.location.origin}/images/trashcan-white.svg`} />
+                                            </ShineButton>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </>
             )}

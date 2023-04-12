@@ -216,6 +216,8 @@ router.post("/deletecomment", passport, async (req, res) => {
         });
     }
 
+    console.log(jwtPayload.uid, req.body.commentId);
+
    const [err, result] = await handlePromise<string | QueryError>(
        deleteCommentOnProfile(jwtPayload.uid, req.body.commentId));
     
