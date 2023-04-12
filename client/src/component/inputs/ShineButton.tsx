@@ -4,9 +4,10 @@ import { motion } from 'framer-motion'
 type Props = {
     children?: ReactNode,
     onClick?: any,
+    className?: string,
 }
 
-export default function ShineButton({ children, onClick }: Props) {
+export default function ShineButton({ children, onClick, className }: Props) {
     const buttonAnimations = {
         hover: {
             scale: 1.05,
@@ -23,7 +24,7 @@ export default function ShineButton({ children, onClick }: Props) {
             variants={buttonAnimations}
             whileHover="hover"
             onClick={onClick}
-            className="h-12 w-fit px-6 rounded-xl bg-[var(--blue-violet)] flex justify-center items-center thin-shadow cursor-pointer"
+            className={`h-12 w-fit px-6 rounded-xl bg-[var(--blue-violet)] flex justify-center items-center thin-shadow cursor-pointer ${className}`}
         >
             {children}
         </motion.div>

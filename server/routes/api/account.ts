@@ -83,7 +83,7 @@ router.post('/uploadpfp', passport, async (req, res) => {
 
             res.send({
                 success: true,
-                response: "Succesfully uploaded new profile picture",
+                response: "Successfully uploaded new profile picture",
             });
         } catch {
             return res.send({
@@ -118,7 +118,7 @@ router.put('/clearpfp', passport, async (req, res) => {
 
     res.send({
         success: true,
-        response: "Succesfully uploaded new profile picture",
+        response: "Successfully uploaded new profile picture",
     });
 })
 
@@ -161,7 +161,7 @@ router.post('/setbio', passport, async (req, res) => {
 
     res.send({
         success: true,
-        response: "Succesfully updated bio",
+        response: "Successfully updated bio",
     });
 })
 

@@ -115,7 +115,7 @@ export const setUserProfilePicture = (uid: number, destination: string): Promise
             return reject(QueryError.UPDATEFAILED);
         }
 
-        resolve("Succesfully updated profile picture");
+        resolve("Successfully updated profile picture");
     })
 }
 
@@ -128,7 +128,7 @@ export const clearUserProfilePicture = (uid: number): Promise<string | QueryErro
             return reject(QueryError.UPDATEFAILED);
         }
 
-        resolve("Succesfully updated profile picture");
+        resolve("Successfully updated profile picture");
     })
 }
 
@@ -141,11 +141,11 @@ export const setUserBio = (uid: number, bio: string): Promise<string | QueryErro
             return reject(QueryError.UPDATEFAILED);
         }
 
-        resolve("Succesfully updated profile picture");
+        resolve("Successfully updated profile picture");
     })
 }
 
-export const getUserComments = (uid: string): Promise<Array<any> | QueryError> => {
+export const getUserCommentsOnProfile = (uid: string): Promise<Array<any> | QueryError> => {
     return new Promise(async (resolve, reject) => {
         const [err, result] = await handlePromise<Array<any>>(
             db.query(`SELECT * FROM profile_comments WHERE profile_id = ${uid}`));
@@ -158,7 +158,7 @@ export const getUserComments = (uid: string): Promise<Array<any> | QueryError> =
             return reject(QueryError.NORESULT);
         }
 
-        const commentArray: { poster_id: number, poster_name: string, poster_role: string, pfpdestination: string, content: string, post_date: string }[] = []
+        const commentArray: { id: number, poster_id: number, poster_name: string, poster_role: string, pfpdestination: string, content: string, post_date: string }[] = []
         for (let i = 0; i < result.length; i++) {
             const element = result[i];
             const [err, res] = await handlePromise<any>(findUser(DEFAULT_COLUMNS, `uid = ${element.poster_id}`));
@@ -167,9 +167,35 @@ export const getUserComments = (uid: string): Promise<Array<any> | QueryError> =
                 continue;
             }
 
-            commentArray.push({ poster_id: element.poster_id, poster_name: res.name, poster_role: res.role, pfpdestination: res.pfpdestination, content: element.content, post_date: element.postdate });
+            commentArray.push({ id: element.id, poster_id: element.poster_id, poster_name: res.name, poster_role: res.role, pfpdestination: res.pfpdestination, content: element.content, post_date: element.postdate });
         }
 
         resolve(commentArray);
+    })
+}
+
+export const createNewCommentOnProfile = (profileId: string, posterId: number, content: string): Promise<string | QueryError> => {
+    return new Promise(async (resolve, reject) => {
+        const [err, _] = await handlePromise<Array<any>>(
+            db.query(`INSERT INTO profile_comments (profile_id, poster_id, content) VALUES (\"${profileId}\", \"${posterId}\", \"${content}\");`));
+
+        if (err) {
+            return reject(QueryError.INSERTIONFAILED);
+        }
+
+        resolve("Successfully posted comment");
+    })
+}
+
+export const deleteCommentOnProfile = (posterId: number, commentId: string): Promise<string | QueryError> => {
+    return new Promise(async (resolve, reject) => {
+        const [err, _] = await handlePromise<Array<any>>(
+            db.query(`DELETE FROM profile_comments WHERE profile_id = ${posterId} AND id = ${commentId};`));
+
+        if (err) {
+            return reject(QueryError.DELETEFAILED);
+        }
+
+        resolve("Successfully deleted comment");
     })
 }

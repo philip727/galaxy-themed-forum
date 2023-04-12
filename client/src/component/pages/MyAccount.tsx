@@ -13,7 +13,6 @@ const tabs: SettingsTabs = {
 }
 
 export default function MyAccount() {
-    const user = useSelector((state: RootState) => state.user.value)
     const [tab, setTab] = useState(ProfileSettingsTab.PROFILE);
 
     return (

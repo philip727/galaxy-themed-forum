@@ -15,6 +15,20 @@ export const getUserComments = (uid: number) => {
     })
 }
 
+export const createUserComment = (content: string) => {
+    return axios.request({
+        url: `/api/user/newcomment`,
+        method: "POST",
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        data: {
+            content: content,
+        }
+    })
+}
+
 export const createUser = (details: IDetailsToRegister) => {
     return axios.request({
         method: 'POST',
@@ -44,4 +58,19 @@ export const loginAsUser = (username: string, password: string) => {
             password: password,
         },
     })
+}
+
+export const deleteCommentById = (commentId: number) => {
+    return axios.request({
+        method: 'POST',
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        url: "/api/user/deletecomment",
+        data: {
+            commentId: commentId,
+        },
+    })
+
 }

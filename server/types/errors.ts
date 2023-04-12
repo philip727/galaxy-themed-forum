@@ -4,6 +4,7 @@ export enum QueryError {
     NORESULT = "NO RESULT",
     INSERTIONFAILED = "FAILED INSERTION",
     UPDATEFAILED = "FAILED UPDATE",
+    DELETEFAILED = "FAILED DELETE"
 };
 
 export enum JWTError {

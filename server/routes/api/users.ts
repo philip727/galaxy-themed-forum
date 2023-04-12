@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { response } from 'express';
 const router = express.Router();
 import { socketIOServer } from '../../index';
 import { LoginData, RegisterData } from '../../types/users';
@@ -6,7 +6,7 @@ import { LoginData, RegisterData } from '../../types/users';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
-import { DEFAULT_COLUMNS, ORIGIN_URL } from '../../config';
+import { DEFAULT_COLUMNS, ORIGIN_URL, PROFILE_PICTURE_FOLDER } from '../../config';
 import bcrypt from 'bcrypt'
 import { validateLoginData, validateRegisterData } from '../../validation/users';
 import handlePromise from '../../scripts/promiseHandler';
@@ -17,10 +17,15 @@ import {
     findLastUser,
     userDoesNotExist,
     insertNewUser,
-    getUserComments,
+    getUserCommentsOnProfile,
+    createNewCommentOnProfile,
+    userExists,
+    deleteCommentOnProfile,
 } from '../../scripts/users';
 
 import { JWTError, QueryError } from '../../types/errors';
+import passport from '../../middleware/passport';
+import { IJWTPayload } from '../../types/auth';
 
 router.use(bodyParser.urlencoded({
     extended: true
@@ -111,7 +116,7 @@ router.get("/id/:id/comments", async (req, res) => {
     }
 
     const [err, data] = await handlePromise<Array<any> | QueryError>(
-        getUserComments(req.params.id));
+        getUserCommentsOnProfile(req.params.id));
 
     if (err) {
         // If there was no result, then there is no user with that uid
@@ -131,6 +136,99 @@ router.get("/id/:id/comments", async (req, res) => {
     res.send({
         success: true,
         response: data,
+    });
+})
+
+router.post("/newcomment", passport, async (req, res) => {
+    const regex = /^[0-9]+$/;
+    let referer = req.headers.referer;
+    if (!referer || typeof referer === "undefined") {
+        res.send({
+            success: false,
+            response: "SERVER ERROR (PNC-NR)",
+        })
+        return;
+    }
+    const profileId = referer.split("/").at(-1);
+
+    if (!profileId || !regex.test(profileId)) {
+        res.send({
+            success: false,
+            response: "SERVER ERROR (PNC-PI)",
+        })
+        return;
+    }
+
+    let [err, result] = await handlePromise<string>(userExists(DEFAULT_COLUMNS, `uid = ${profileId}`)); 
+    if (err) {
+        return res.send({
+            success: false,
+            response: "SERVER ERROR (PNC-PID)",
+        });
+    }
+
+    // Makes sure there is a jwtpayload from the passport
+    if (!("jwtPayload" in req)) {
+        return res.send({
+            success: false,
+            response: "SERVER ERROR (PNC-JP)",
+        });
+    }
+
+    if (!("content" in req.body)) {
+        return res.send({
+            success: false,
+            response: "SERVER ERROR (PNC-DR)",
+        });
+    }
+
+    const jwtPayload = req.jwtPayload as IJWTPayload;
+    
+    [err, result] = await handlePromise<string | QueryError>(createNewCommentOnProfile(profileId, jwtPayload.uid, req.body.content));
+
+    if (err) {
+        return res.send({
+            success: false,
+            response: `SERVER ERROR (PNC-${err})`,
+        });
+    }
+
+    res.send({
+        success: true,
+        response: result,
+    })
+})
+
+router.post("/deletecomment", passport, async (req, res) => {
+    // Makes sure there is a jwtpayload from the passport
+    if (!("jwtPayload" in req)) {
+        return res.send({
+            success: false,
+            response: "SERVER ERROR (PDC-JP)",
+        });
+    }
+    const jwtPayload = req.jwtPayload as IJWTPayload;
+
+    if (!("commentId" in req.body)) {
+        return res.send({
+            success: false,
+            response: "SERVER ERROR (PNC-DR)",
+        });
+    }
+
+   const [err, result] = await handlePromise<string | QueryError>(
+       deleteCommentOnProfile(jwtPayload.uid, req.body.commentId));
+    
+    if (err) {
+        return res.send({
+            success: false,
+            response: `SERVER ERROR (PNC-${err})`,
+        });
+    }
+
+    res.send({
+        success: true,
+        response: result,
     });
 })
 
@@ -210,7 +308,7 @@ router.post("/register", cors({ origin: ORIGIN_URL }), async (req, res) => {
 
     res.send({
         success: true,
-        response: "Succesfully Registered",
+        response: "Successfully Registered",
     })
 })
 
