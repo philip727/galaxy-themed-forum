@@ -136,7 +136,7 @@ export default function Profile() {
                                 </ShineButton>
                             )}
                         </div>
-                        <div className="w-full mt-2 min-h-[5rem]">
+                        <div className="w-full mt-2 min-h-[5rem] flex flex-col-reverse">
                             {userComments.success && (
                                 <>
                                     {userComments.response.map((comment: any, index: any) => (
@@ -150,8 +150,8 @@ export default function Profile() {
                                                 <p className="text-md">{comment.content}</p>
                                             </div>
                                             {comment.poster_id == user.uid && (
-                                                <ShineButton onClick={() => { deleteCommentOnProfile(comment.id) }} className="absolute top-0 right-0">
-
+                                                <ShineButton onClick={() => { deleteCommentOnProfile(comment.id) }} className="!px-2 absolute top-2 right-0">
+                                                    <img className="w-8 h-8" src={`${window.location.origin}/images/trashcan-white.svg`}/>
                                                 </ShineButton>
                                             )}
                                         </div>
