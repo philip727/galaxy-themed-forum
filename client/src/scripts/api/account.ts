@@ -20,3 +20,15 @@ export const clearPfp = () => {
         url: "/api/account/clearpfp",
     })
 }
+
+export const setBio = (bio: string) => {
+    return axios.request({
+        method: 'POST',
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        url: "/api/account/setbio",
+        data: { bio: bio }
+    })
+}

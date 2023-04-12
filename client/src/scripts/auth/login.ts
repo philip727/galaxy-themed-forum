@@ -140,5 +140,5 @@ export const jwtLogin = async (jwt: string, update?: boolean) => {
         return;
     }
 
-    store.dispatch(updateUser({ username: userDetails.username, uid: userDetails.uid, role: data.response.role, regdate: data.response.regdate }));
+    store.dispatch(updateUser({ username: userDetails.username, uid: userDetails.uid, role: data.response.role, regdate: data.response.regdate, bio: data.response.bio }));
 }

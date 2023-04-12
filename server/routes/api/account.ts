@@ -9,14 +9,18 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import { PROFILE_PICTURE_FOLDER } from '../../config';
 import handlePromise from '../../scripts/promiseHandler';
-import { clearUserProfilePicture, setUserProfilePicture } from '../../scripts/users';
+import { clearUserProfilePicture, setUserBio, setUserProfilePicture } from '../../scripts/users';
+import cors from 'cors'
+
 const router = express.Router();
 
+router.use(cors());
 router.use(bodyParser.urlencoded({
     extended: true
 }));
 
-router.post('/uploadpfp', passport, async (req: any, res: any) => {
+
+router.post('/uploadpfp', passport, async (req, res) => {
 
     // Creates the upload directory for the files
     const form = formidable({
@@ -93,7 +97,7 @@ router.post('/uploadpfp', passport, async (req: any, res: any) => {
 
 })
 
-router.put('/clearpfp', passport, async (req: any, res: any) => {
+router.put('/clearpfp', passport, async (req, res) => {
     // Makes sure there is a jwtpayload from the passport
     if (!("jwtPayload" in req)) {
         return res.send({
@@ -117,6 +121,49 @@ router.put('/clearpfp', passport, async (req: any, res: any) => {
     res.send({
         success: true,
         response: "Succesfully uploaded new profile picture",
+    });
+})
+
+router.post('/setbio', passport, async (req, res) => {
+    // Makes sure there is a jwtpayload from the passport
+    if (!("jwtPayload" in req)) {
+        return res.send({
+            success: false,
+            response: "SERVER ERROR (UPB-JP)",
+        });
+    }
+
+    const jwtPayload = req.jwtPayload as IJWTPayload;
+
+    const data = req.body;
+
+    if (!("bio" in data)) {
+        return res.send({
+            success: false,
+            response: "SERVER ERROR (UPB-BD)",
+        });
+    };
+
+    if (data.bio.length > 200) {
+        return res.send({
+            success: false,
+            response: "Bio can only be 200 characters long",
+        });
+    }
+
+    const [err, _] = await handlePromise<QueryError | string>(
+        setUserBio(jwtPayload.uid, data.bio));
+
+    if (err) {
+        return res.send({
+            success: false,
+            response: `SERVER ERROR (UPB-SUB-${err})`,
+        });
+    }
+
+    res.send({
+        success: true,
+        response: "Succesfully updated bio",
     });
 })
 

@@ -131,3 +131,16 @@ export const clearUserProfilePicture = (uid: number): Promise<string | QueryErro
         resolve("Succesfully updated profile picture");
     })
 }
+
+export const setUserBio = (uid: number, bio: string): Promise<string | QueryError> => {
+    return new Promise(async (resolve, reject) => {
+        const [err, _] = await handlePromise<Array<any>>(
+            db.query(`UPDATE users SET bio = \"${bio}\" WHERE uid = ${uid};`));
+
+        if (err) {
+            return reject(QueryError.UPDATEFAILED);
+        }
+
+        resolve("Succesfully updated profile picture");
+    })
+}

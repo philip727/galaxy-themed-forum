@@ -1,20 +1,38 @@
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import { motion } from "framer-motion";
-import { ChangeEvent } from "react"
+import { ChangeEvent, useRef, useState } from "react"
+import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { setPfp, clearPfp } from "../../../scripts/api/account";
+import { updateUser } from "../../../reducers/user";
+import { setPfp, clearPfp, setBio } from "../../../scripts/api/account";
 import { createNotification } from "../../../scripts/layout/notificationManager";
-import { formatDate, getPfp } from "../../../scripts/layout/profile";
+import { determineClass, formatDate, getPfp } from "../../../scripts/layout/profile";
 import handlePromise from "../../../scripts/promiseHandler";
 import { updateCacheFromUser } from "../../../scripts/utils/cache";
 import { RootState } from "../../../store";
+import ShineButton from "../../inputs/ShineButton";
 import "./Display.scss";
 
 export default function Display() {
+    const dispatch = useDispatch();
     const cache = useSelector((state: RootState) => state.cache.value)
     const user = useSelector((state: RootState) => state.user.value);
+    const userPersonalInfo = useRef({
+        bio: "",
+    })
 
-    const handleChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const handleTextChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        if (e.target.name === "bio" && e.target.value.length >= 200) {
+            createNotification({
+                text: "Bio can only be 200 characters long",
+            })
+            return;
+        }
+
+        userPersonalInfo.current = { ...userPersonalInfo.current, [e.target.name]: e.target.value }
+    }
+
+    const handlePictureChange = async (e: ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
 
         if (!e.target || !e.target.files) {
@@ -88,14 +106,36 @@ export default function Display() {
         updateCacheFromUser(user.uid);
     }
 
-    const determineClass = (role: string): string => {
-        switch (role) {
-            case "admin":
-                return "font-extrabold text-[var(--admin-colour)] admin-container";
-            case "moderator":
-                return "font-bold text-[var(--moderator-colour)]";
+    const updateBio = async () => {
+        const [err, result] = await handlePromise<AxiosResponse<any, any>>(setBio(userPersonalInfo.current.bio));
+        if (err) {
+            createNotification({
+                text: err.data.response,
+            });
+            return;
         }
-        return "font-bold text-[var(--floral-white)]"
+
+        const data = result?.data;
+
+        if (!data || !("success" in data) || !("response" in data)) {
+            createNotification({
+                text: "SERVER ERROR (C-UPFP)",
+            });
+            return;
+        }
+
+        if (!data.success) {
+            createNotification({
+                text: data.response,
+            });
+            return;
+        }
+
+        createNotification({
+            text: data.response,
+        });
+
+        dispatch(updateUser({ ...user, bio: userPersonalInfo.current.bio }));
     }
 
     return (
@@ -113,7 +153,7 @@ export default function Display() {
                             className="w-10 h-10 bg-[var(--blue-violet)] thin-shadow absolute -bottom-2 rounded-full cursor-pointer flex flex-row justify-center items-center"
                         >
                             <img className="h-6 w-6" src="images/pencil-white.svg" />
-                            <input className="image-upload" onChange={handleChange} accept="image/png, image/gif, image/jpeg" type="file" name="avatar" />
+                            <input className="image-upload" onChange={handlePictureChange} accept="image/png, image/gif, image/jpeg" type="file" name="avatar" />
                         </motion.label>
                         <motion.div
                             whileHover={{ scale: 1.08 }}
@@ -122,7 +162,7 @@ export default function Display() {
                             className="w-10 h-10 bg-[var(--full-red)] absolute -bottom-2 thin-shadow right-0 rounded-full cursor-pointer flex flex-row justify-center items-center"
                             onClick={onClickClear}
                         >
-                            <img className="h-6 w-6" src="images/cross-white.svg" />
+                            <img className="h-[1.35rem] w-[1.35rem]" src="images/cross-white.svg" />
                         </motion.div>
                     </div>
                     <div className="flex flex-col ml-4">
@@ -133,6 +173,19 @@ export default function Display() {
                         </div>
                     </div>
                 </div>
+            </div>
+            <textarea 
+                name="bio" 
+                onChange={handleTextChange} 
+                maxLength={200} 
+                placeholder="Enter Bio..." 
+                className="mt-6 w-full h-40 min-h-[10rem] pl-1 mb-3 inset-shadow bg-[var(--dark-jet)] resize-none"
+                value={user.bio}
+            />
+            <div className="w-full flex flex-row justify-end">
+                <ShineButton onClick={updateBio}>
+                    <p className="font-bold text-xl">Update</p>
+                </ShineButton>
             </div>
         </div>
     )

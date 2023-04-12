@@ -24,7 +24,7 @@ export interface IDetailsToLogin {
 }
 
 export interface IUserReducerAction {
-    payload: { username: string, uid: number, role: string, regdate: string },
+    payload: { username: string, uid: number, role: string, regdate: string, bio: string },
     type: string,
 }
 

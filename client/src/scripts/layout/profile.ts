@@ -16,3 +16,13 @@ export const formatDate = (sqlDate: string): string => {
 
     return `${day}/${month}/${year}`;
 }
+
+export const determineClass = (role: string): string => {
+    switch (role) {
+        case "admin":
+            return "font-extrabold text-[var(--admin-colour)] admin-container";
+        case "moderator":
+            return "font-bold text-[var(--moderator-colour)]";
+    }
+    return "font-bold text-[var(--floral-white)]"
+}

@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { IUserReducerAction } from '../types/user';
 
-const initialStateValue = { username: "", uid: -1, role: "user", regdate: "" };
+const initialStateValue = { username: "", uid: -1, role: "user", regdate: "", bio: "" };
 
 const userSlice = createSlice({
     name: "user",

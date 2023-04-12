@@ -25,7 +25,7 @@ export default function MyAccount() {
         >
             <SectionHeader widthClass="w-[50rem]" headerText={"Account Settings"}/>
             <div className="container w-[50rem] flex flex-row items-start justify-start py-3 pl-3">
-                <div className="h-[30rem] bg-[var(--night)] w-1/4 flex flex-col justify-start items-center">
+                <div className="h-full bg-[var(--night)] outset-shadow w-1/4 flex flex-col justify-start items-center">
                     {Object.keys(tabs).map((key, i) => (
                         <p
                             key={i}

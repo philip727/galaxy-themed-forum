@@ -1,21 +1,11 @@
 import { motion } from "framer-motion";
 import { useLoaderData } from "react-router-dom";
 import { getUserByUID } from "../../scripts/api/users";
-import { formatDate, getPfp } from "../../scripts/layout/profile";
+import { determineClass, formatDate, getPfp } from "../../scripts/layout/profile";
 
 export default function Profile() {
     const loaderData: any = useLoaderData();
     const data = loaderData.data;
-
-    const determineClass = (role: string): string => {
-        switch (role) {
-            case "admin":
-                return "font-extrabold text-[var(--admin-colour)] admin-container";
-            case "moderator":
-                return "font-bold text-[var(--moderator-colour)]";
-        }
-        return "font-bold text-[var(--floral-white)]"
-    }
 
     return (
         <motion.div
