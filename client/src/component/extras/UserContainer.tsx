@@ -3,9 +3,10 @@ import { IPublicUserDetails } from "../../types/user"
 
 type Props = {
     user: IPublicUserDetails,
+    className?: string,
 }
 
-export default function UserContainer({ user }: Props) {
+export default function UserContainer({ user, className }: Props) {
     const determineClass = (): string => {
         switch (user.role) {
             case "admin":
@@ -17,8 +18,8 @@ export default function UserContainer({ user }: Props) {
     }
 
     return (
-        <Link to={`profile/${user.uid}`}>
-            <p className={`${determineClass()} mt-0`}>{user.name}</p>
+        <Link to={`/profile/${user.uid}`}>
+            <p className={`${determineClass()} mt-0 ${className}`}>{user.name}</p>
         </Link>
     )
 }

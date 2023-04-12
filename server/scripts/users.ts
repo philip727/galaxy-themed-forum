@@ -106,7 +106,7 @@ export const insertNewUser = (data: RegisterData): Promise<RegisterData | QueryE
     })
 }
 
-export const setUserProfilePicture = (uid: number, destination: string): Promise<string | QueryError>  => {
+export const setUserProfilePicture = (uid: number, destination: string): Promise<string | QueryError> => {
     return new Promise(async (resolve, reject) => {
         const [err, _] = await handlePromise<Array<any>>(
             db.query(`UPDATE users SET pfpdestination = \"${destination}\" WHERE uid = ${uid};`));
@@ -119,7 +119,7 @@ export const setUserProfilePicture = (uid: number, destination: string): Promise
     })
 }
 
-export const clearUserProfilePicture = (uid: number): Promise<string | QueryError>  => {
+export const clearUserProfilePicture = (uid: number): Promise<string | QueryError> => {
     return new Promise(async (resolve, reject) => {
         const [err, _] = await handlePromise<Array<any>>(
             db.query(`UPDATE users SET pfpdestination = NULL WHERE uid = ${uid};`));
@@ -142,5 +142,34 @@ export const setUserBio = (uid: number, bio: string): Promise<string | QueryErro
         }
 
         resolve("Succesfully updated profile picture");
+    })
+}
+
+export const getUserComments = (uid: string): Promise<Array<any> | QueryError> => {
+    return new Promise(async (resolve, reject) => {
+        const [err, result] = await handlePromise<Array<any>>(
+            db.query(`SELECT * FROM profile_comments WHERE profile_id = ${uid}`));
+
+        if (err || !result) {
+            return reject(QueryError.NULL);
+        }
+
+        if (Array.isArray(result) && result.length == 0) {
+            return reject(QueryError.NORESULT);
+        }
+
+        const commentArray: { poster_id: number, poster_name: string, poster_role: string, pfpdestination: string, content: string, post_date: string }[] = []
+        for (let i = 0; i < result.length; i++) {
+            const element = result[i];
+            const [err, res] = await handlePromise<any>(findUser(DEFAULT_COLUMNS, `uid = ${element.poster_id}`));
+
+            if (err || !res) {
+                continue;
+            }
+
+            commentArray.push({ poster_id: element.poster_id, poster_name: res.name, poster_role: res.role, pfpdestination: res.pfpdestination, content: element.content, post_date: element.postdate });
+        }
+
+        resolve(commentArray);
     })
 }

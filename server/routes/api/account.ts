@@ -21,7 +21,6 @@ router.use(bodyParser.urlencoded({
 
 
 router.post('/uploadpfp', passport, async (req, res) => {
-
     // Creates the upload directory for the files
     const form = formidable({
         multiples: false,
@@ -94,7 +93,6 @@ router.post('/uploadpfp', passport, async (req, res) => {
         }
 
     })
-
 })
 
 router.put('/clearpfp', passport, async (req, res) => {

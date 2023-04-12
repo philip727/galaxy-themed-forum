@@ -138,6 +138,10 @@ export default function Display() {
         dispatch(updateUser({ ...user, bio: userPersonalInfo.current.bio }));
     }
 
+    if (user.bio) {
+        userPersonalInfo.current.bio = user.bio;
+    }
+
     return (
         <div className="flex flex-col items-start">
             <h1 className="text-3xl font-bold">Profile</h1>
@@ -180,7 +184,7 @@ export default function Display() {
                 maxLength={200} 
                 placeholder="Enter Bio..." 
                 className="mt-6 w-full h-40 min-h-[10rem] pl-1 mb-3 inset-shadow bg-[var(--dark-jet)] resize-none"
-                value={user.bio}
+                defaultValue={user.bio}
             />
             <div className="w-full flex flex-row justify-end">
                 <ShineButton onClick={updateBio}>

@@ -17,6 +17,7 @@ import {
     findLastUser,
     userDoesNotExist,
     insertNewUser,
+    getUserComments,
 } from '../../scripts/users';
 
 import { JWTError, QueryError } from '../../types/errors';
@@ -96,6 +97,42 @@ router.get("/id/:id", async (req, res) => {
         response: data,
     });
 });
+
+router.get("/id/:id/comments", async (req, res) => {
+    const regex = /^[0-9]+$/;
+
+    // If the uid is not a number, clearly the user tried to tamper with the url
+    if (!regex.test(req.params.id)) {
+        console.log(`${req.headers['x-forwarded-for'] || req.socket.remoteAddress} `);
+        return res.send({
+            success: false,
+            response: "Invalid UID",
+        });
+    }
+
+    const [err, data] = await handlePromise<Array<any> | QueryError>(
+        getUserComments(req.params.id));
+
+    if (err) {
+        // If there was no result, then there is no user with that uid
+        if (err === QueryError.NORESULT) {
+            return res.send({
+                success: false,
+                response: "This user has no comments",
+            })
+        }
+        return res.send({
+            success: false,
+            response: `SERVER ERROR (GUC-${err})`,
+        })
+    }
+
+    // Returns the data assosciated with the index
+    res.send({
+        success: true,
+        response: data,
+    });
+})
 
 router.get("/last", async (_, res) => {
     const [err, data] = await handlePromise<object | string>(findLastUser());

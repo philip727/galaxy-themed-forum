@@ -6,6 +6,13 @@ export const getUserByUID = (uid: number) => {
         url: `/api/user/id/${uid}`,
         method: "GET",
     })
+
+}
+export const getUserComments = (uid: number) => {
+    return axios.request({
+        url: `/api/user/id/${uid}/comments`,
+        method: "GET",
+    })
 }
 
 export const createUser = (details: IDetailsToRegister) => {
