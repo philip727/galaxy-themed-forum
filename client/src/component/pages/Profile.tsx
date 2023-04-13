@@ -11,6 +11,19 @@ export default function Profile() {
     const params = useParams() as any;
     const userInfo = loaderData.userInfo.data;
     const userComments = loaderData.userComments.data;
+    const commentCallbacks: Array<() => void> = []
+
+    // Calls all the comment callbacks
+    const callComments = () => {
+        commentCallbacks.forEach(fn => {
+            fn();
+        })
+    }
+
+    // Adds a callback
+    const addCommentCallback = (fn: () => void) => {
+        commentCallbacks.push(fn);
+    }
 
     return (
         <motion.div
@@ -25,8 +38,8 @@ export default function Profile() {
                     <Bio userInfo={userInfo} />
                     <div className="container w-[50rem] flex flex-col items-start px-3 pb-3">
                         <h1 className="mt-2 text-2xl font-bold">{userInfo.response.name}'s Comments</h1>
-                        <PostComment />
-                        <UserComments userComments={userComments} profileId={params.id}/>
+                        <PostComment callComments={callComments} />
+                        <UserComments userComments={userComments} profileId={params.id} addCommentCallback={addCommentCallback} />
                     </div>
                 </>
             )}

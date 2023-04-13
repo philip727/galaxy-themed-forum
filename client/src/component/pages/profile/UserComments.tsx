@@ -12,17 +12,26 @@ import ShineButton from "../../inputs/ShineButton"
 type Props = {
     userComments: { success: any, response: any }
     profileId: string,
+    addCommentCallback: (fn: () => void) => void,
 }
 
-export default function UserComments({ userComments, profileId }: Props) {
+export default function UserComments({ userComments, profileId, addCommentCallback }: Props) {
     const user = useSelector((state: RootState) => state.user.value)
     const [comments, setComments] = useState(userComments)
 
+    // Deletes the comment and also updates
     const handleDeleteComment = async (commentId: number) => {
-        const result = await deleteCommentOnProfile(commentId, parseInt(profileId))
+        await deleteCommentOnProfile(commentId)
 
-        setComments(result)
+        setComments(await updateCommentsOnProfile(parseInt(profileId)));
     }
+
+    // Updates the comments on callback, this is used in the post comment component so we don't re-render too much
+    useEffect(() => {
+        addCommentCallback(async () => {
+            setComments(await updateCommentsOnProfile(parseInt(profileId)));       
+        })
+    }, []);
 
     return (
         <>
@@ -56,34 +65,8 @@ export default function UserComments({ userComments, profileId }: Props) {
     )
 }
 
-const deleteCommentOnProfile = async (commentId: number, profileId: number): Promise<{ success: boolean, response: Array<any> }> => {
-    let [err, result] = await handlePromise<AxiosResponse<any, any>>(deleteCommentById(commentId));
-    if (err) {
-        createNotification({
-            text: err.data.response,
-        })
-        return { success: false, response: [] };
-    }
-
-    if (!result) {
-        createNotification({
-            text: "SERVER ERROR (C-DCI)",
-        })
-        return { success: false, response: [] };
-    }
-
-    if (!result.data.success) {
-        createNotification({
-            text: result.data.response,
-        })
-        return { success: false, response: [] };
-    }
-
-    createNotification({
-        text: result.data.response,
-    });
-
-    [err, result] = await handlePromise<AxiosResponse<any, any>>(getUserComments(profileId));
+const updateCommentsOnProfile = async (profileId: number): Promise<{ success: false, response: Array<any> }> => {
+    const [err, result] = await handlePromise<AxiosResponse<any, any>>(getUserComments(profileId));
 
     if (err) {
         createNotification({
@@ -104,4 +87,32 @@ const deleteCommentOnProfile = async (commentId: number, profileId: number): Pro
     }
 
     return result.data;
+}
+
+const deleteCommentOnProfile = async (commentId: number) => {
+    let [err, result] = await handlePromise<AxiosResponse<any, any>>(deleteCommentById(commentId));
+    if (err) {
+        createNotification({
+            text: err.data.response,
+        })
+        return;
+    }
+
+    if (!result) {
+        createNotification({
+            text: "SERVER ERROR (C-DCI)",
+        })
+        return;
+    }
+
+    if (!result.data.success) {
+        createNotification({
+            text: result.data.response,
+        })
+        return;
+    }
+
+    createNotification({
+        text: result.data.response,
+    });
 }
