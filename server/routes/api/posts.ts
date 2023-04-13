@@ -1,11 +1,10 @@
 import express from 'express';
 import { db } from '../../index';
 import handlePromise from '../../scripts/promiseHandler';
-import { QueryError } from 'sequelize';
+import { QueryError } from '../../types/errors';
 const router = express.Router();
 
 router.get("/fromcategory/:catid", async (req, res) => {
-
     const regex = /^[0-9]+$/;
     // If the uid is not a number, clearly the user tried to tamper with the url
     if (!regex.test(req.params.catid)) {
@@ -35,7 +34,6 @@ router.get("/fromcategory/:catid", async (req, res) => {
         success: true,
         response: result
     })
-
 })
 
 export default router;

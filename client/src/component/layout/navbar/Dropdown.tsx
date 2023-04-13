@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../../scripts/auth/login";
+import { RootState } from "../../../store";
 import './Dropdown.scss';
 
 type Props = {
-    uid: number,
     closeNav: () => void,
 }
 
@@ -12,14 +13,15 @@ type NavItems = {
     [key: string]: { img: string, fn: () => void }
 }
 
-export default function Dropdown({ uid, closeNav }: Props) {
+export default function Dropdown({ closeNav }: Props) {
+    const user = useSelector((state: RootState) => state.user.value)
     const navigate = useNavigate();
     const userNavItems: NavItems = {
         "Profile": {
             "img": `${window.location.origin}/images/profile-white.svg`,
             fn: (): void => {
                 closeNav();
-                navigate(`/profile/${uid}`)
+                navigate(`/profile/${user.uid}`)
             }
         },
         "Account": {

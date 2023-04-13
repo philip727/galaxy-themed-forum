@@ -2,7 +2,6 @@ import { verifyJWTToken } from "../scripts/auth";
 import handlePromise from "../scripts/promiseHandler";
 import jwtDecode from 'jwt-decode'
 import { IJWTPayload } from "../types/auth";
-import { QueryError } from "sequelize";
 import { userExists } from "../scripts/users";
 import { DEFAULT_COLUMNS } from "../config";
 

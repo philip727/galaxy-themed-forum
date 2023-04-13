@@ -5,6 +5,7 @@ import { createUserComment } from "../../../scripts/api/users";
 import { createNotification } from "../../../scripts/layout/notificationManager";
 import handlePromise from "../../../scripts/promiseHandler";
 import { RootState } from "../../../store";
+import InputArea from "../../inputs/InputArea";
 import ShineButton from "../../inputs/ShineButton";
 
 type Props = {
@@ -58,13 +59,14 @@ export default function PostComment({ callComments }: Props) {
         <>
             {isAutenticated && (
                 <>
-                    <textarea
-                        ref={textArea}
-                        onChange={handlePostCommentChange}
-                        name="bio"
-                        maxLength={120}
-                        placeholder="Add comment.."
-                        className="mt-2 w-full h-20 min-h-[5rem] pl-1 mb-3 inset-shadow bg-[var(--dark-jet)] resize-none"
+                    <InputArea 
+                        ref={textArea} 
+                        onChange={handlePostCommentChange} 
+                        name="bio" 
+                        maxLength={120} 
+                        placeholder="Add comment..." 
+                        className="mt-2 w-full !h-24 min-h-[5rem] mb-3" 
+                        areaClassName="!px-3 pt-2"
                     />
                     {showButton && (
                         <div className="flex justify-end w-full">

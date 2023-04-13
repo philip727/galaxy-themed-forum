@@ -6,28 +6,38 @@ CREATE TABLE users (
     name VARCHAR(16) NOT NULL UNIQUE,
     email varchar(50) NOT NULL UNIQUE,
     regdate DATETIME NOT NULL DEFAULT NOW(),
-    role VARCHAR(16) NOT NULL,
-    password varchar(72) NOT NULL
+    role ENUM('admin', 'moderator', 'user') NOT NULL,
+    password varchar(72) NOT NULL,
+    pfpdestination VARCHAR(255),
+    bio VARCHAR(200)
 );
 
 /* create categories table */
 CREATE TABLE categories (
-	CID int PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+	id int PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
     name VARCHAR(16) NOT NULL UNIQUE,
-    description VARCHAR(255) NOT NULL
+    description VARCHAR(255) NOT NULL,
+    type VARCHAR(20) NOT NULL
 );
 
 /* create categories table */
 CREATE TABLE posts (
-	PID int PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
-    name VARCHAR(16) NOT NULL,
-    content TEXT NULL,
-    parent_CID int NOT NULL,
-    poster_UID int NOT NULL
+	id int PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+    name VARCHAR(30) NOT NULL,
+    content TEXT NOT NULL,
+    category_id int NOT NULL,
+    profile_id int NOT NULL
 );
+ALTER TABLE posts ADD FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE posts ADD FOREIGN KEY(profile_id) REFERENCES users(UID) ON DELETE RESTRICT ON UPDATE CASCADE;
 
-/* link the posts to the category */
-ALTER TABLE posts ADD FOREIGN KEY(parent_CID) REFERENCES categories(CID) ON DELETE RESTRICT ON UPDATE CASCADE;
-
-/* links the posts to the poster */
-ALTER TABLE posts ADD FOREIGN KEY(poster_UID) REFERENCES users(UID) ON DELETE RESTRICT ON UPDATE CASCADE;
+/* create profile comments table */
+CREATE TABLE profile_comments (
+	id int PRIMARY KEY AUTO_INCREMENT NOT NULL UNIQUE,
+    profile_id int NOT NULL, 
+    poster_id int NOT NULL,
+    content VARCHAR(120) NOT NULL,
+    postdate DATETIME NOT NULL DEFAULT NOW()
+);
+ALTER TABLE profile_comments ADD FOREIGN KEY(profile_id) REFERENCES users(UID) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE profile_comments ADD FOREIGN KEY(poster_id) REFERENCES users(UID) ON DELETE CASCADE ON UPDATE CASCADE;

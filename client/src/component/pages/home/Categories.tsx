@@ -14,7 +14,7 @@ export default function Categories({ categories }: Props) {
             {categories.success && (
                 <>
                     {categories.response.map((category: any, index: any) => (
-                        <Link key={index} to={`/category/${category.CID}`}>
+                        <Link key={index} to={`/category/${category.id}`}>
                             <CategoryContainer name={category.name} description={category.description} categoryId={category.CID} />
                         </Link>
                     ))}

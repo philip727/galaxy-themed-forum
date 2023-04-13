@@ -9,8 +9,8 @@ import Dropdown from "./navbar/Dropdown";
 
 export default function Navbar() {
     const [userNav, setUserNav] = useState(false);
-    const user = useSelector((state: RootState) => state.user.value)
     const cache = useSelector((state: RootState) => state.cache.value)
+    const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticed)
     const closeNav = () => {
         setUserNav(false);
     }
@@ -28,7 +28,7 @@ export default function Navbar() {
                 </Link>
             </div>
             <div className="w-full lg:w-1/3 flex justify-between lg:justify-end items-center px-4 2xl:pr-24 lg:gap-4 xl:gap-8 mt-2 lg:mt-0">
-                {user.username.length === 0 && user.uid < 0 && (
+                {!isAuthenticated && (
                     <>
                         <Link to="/register">
                             <ShineButton>
@@ -42,7 +42,7 @@ export default function Navbar() {
                         </Link>
                     </>
                 )}
-                {user.username.length > 0 && user.uid >= 0 && (
+                {isAuthenticated && (
                     <div className="relative">
                         <motion.img
                             onClick={() => { setUserNav(!userNav) }}
@@ -53,7 +53,7 @@ export default function Navbar() {
                             src={getPfp(cache.pfp)}
                         />
                         {userNav && (
-                            <Dropdown uid={user.uid} closeNav={closeNav} />
+                            <Dropdown closeNav={closeNav} />
                         )}
                     </div>
                 )}

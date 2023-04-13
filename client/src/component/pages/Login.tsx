@@ -26,8 +26,6 @@ export default function Login() {
         password: "",
     });
 
-
-
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         loginData.current = { ...loginData.current, [event.target.name]: event.target.value };
     }
