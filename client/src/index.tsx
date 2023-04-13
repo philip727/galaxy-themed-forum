@@ -4,10 +4,15 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
 import store from './store'
+import onlineStatus from './onlineStatus';
+import preLogin from './preLogin';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
 );
+
+preLogin();
+onlineStatus();
 
 root.render(
     <Provider store={store}>

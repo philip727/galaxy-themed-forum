@@ -11,7 +11,7 @@ import store from '../../store'
 import { updateUser } from "../../reducers/user";
 import { getUserByUID } from "../api/users";
 import { createNotification } from "../layout/notificationManager";
-
+import { updateCacheFromUser } from "../utils/cache";
 
 // Updates the auth items using the jwt
 export const updateAuthWithJWTToken = (jwt: string, setToken?: boolean): Promise<string> => {
@@ -139,6 +139,9 @@ export const jwtLogin = async (jwt: string, update?: boolean) => {
         })
         return;
     }
+
+    // Locally stores the pfp destination of our user so we don't need to request everywhere we see it 
+    updateCacheFromUser(userDetails.uid);
 
     store.dispatch(updateUser({ username: userDetails.username, uid: userDetails.uid, role: data.response.role, regdate: data.response.regdate, bio: data.response.bio }));
 }

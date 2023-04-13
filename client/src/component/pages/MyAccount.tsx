@@ -1,7 +1,5 @@
 import { motion } from "framer-motion";
-import { ReactNode, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store";
+import { useState } from "react";
 import { ProfileSettingsTab, SettingsTabs } from "../../types/layout";
 import SectionHeader from "../extras/SectionHeader";
 import Display from "../layout/account-tabs/Display";

@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios'
 import { ChangeEvent, useRef } from "react";
-import { isLoginDataValid, jwtLogin, updateAuthWithJWTToken } from '../../scripts/auth/login';
+import { isLoginDataValid, jwtLogin } from '../../scripts/auth/login';
 import { IDetailsToLogin } from "../../types/user";
 import InputField from "../inputs/InputField"
 import ShineButton from "../inputs/ShineButton"
@@ -27,45 +27,6 @@ export default function Login() {
     });
 
 
-    const login = async () => {
-        // Client side checks
-        const [isValidData, validMessage] = isLoginDataValid(loginData.current);
-
-        // If the data is not valid to make a request, then we error.
-        // Everything is also checked on serverside anyway.
-        if (!isValidData) {
-            createNotification({
-                text: validMessage,
-            });
-            return;
-        }
-
-        // Requests to login with the login data, will return a jwt so we can login on the client
-        const [err, res] = await handlePromise<AxiosResponse<any, any>>(loginAsUser(loginData.current.username, loginData.current.password));
-        if (err) {
-            console.log(err);
-            return;
-        }
-
-        const data = res?.data;
-
-        if (!data.success) {
-            // Creates a prompt if with the error message
-            createModal({
-                header: "Login",
-                subtext: data.response,
-                buttons: [
-                    {
-                        text: "Ok",
-                        fn: ModalFunctionTypes.CLOSE,
-                    }
-                ]
-            })
-            return;
-        }
-
-        jwtLogin(data.response, true);
-    }
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         loginData.current = { ...loginData.current, [event.target.name]: event.target.value };
@@ -87,7 +48,7 @@ export default function Login() {
                     <div className="w-full h-full flex flex-col justify-center gap-8 items-center p-8">
                         <InputField onChange={handleChange} type="text" name="username" placeholder="Username" />
                         <InputField onChange={handleChange} type="password" name="password" placeholder="Password" />
-                        <ShineButton onClick={() => { login() }}>
+                        <ShineButton onClick={() => { login(loginData.current) }}>
                             <p>Login</p>
                         </ShineButton>
                     </div>
@@ -95,4 +56,44 @@ export default function Login() {
             </div>
         </motion.div>
     )
+}
+
+const login = async (loginData: IDetailsToLogin) => {
+    // Client side checks
+    const [isValidData, validMessage] = isLoginDataValid(loginData);
+
+    // If the data is not valid to make a request, then we error.
+    // Everything is also checked on serverside anyway.
+    if (!isValidData) {
+        createNotification({
+            text: validMessage,
+        });
+        return;
+    }
+
+    // Requests to login with the login data, will return a jwt so we can login on the client
+    const [err, res] = await handlePromise<AxiosResponse<any, any>>(loginAsUser(loginData.username, loginData.password));
+    if (err) {
+        console.log(err);
+        return;
+    }
+
+    const data = res?.data;
+
+    if (!data.success) {
+        // Creates a prompt if with the error message
+        createModal({
+            header: "Login",
+            subtext: data.response,
+            buttons: [
+                {
+                    text: "Ok",
+                    fn: ModalFunctionTypes.CLOSE,
+                }
+            ]
+        })
+        return;
+    }
+
+    jwtLogin(data.response, true);
 }

@@ -30,41 +30,12 @@ export default function Register() {
         confirmPassword: "",
     });
 
-    const register = async () => {
-        // Client side checks
-        const [isValidData, validMessage] = isRegisterDataValid(registerData.current);
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+        registerData.current = { ...registerData.current, [event.target.name]: event.target.value };
+    }
 
-        // Client side checks, checks on serverside anyway
-        if (!isValidData) {
-            createNotification({
-                text: validMessage,
-            });
-            return;
-        }
-
-        // Post to register
-        const [err, res] = await handlePromise<AxiosResponse<any, any>>(createUser(registerData.current));
-        if (err) {
-            // Server error prompt if it can't make the request
-            createModal({
-                header: "Register",
-                subtext: "Server is unavailable (CR)",
-                buttons: [{
-                    text: "Ok",
-                    fn: destroyModal,
-                }]
-            });
-            return;
-        }
-
-        const data = res?.data;
-        if (!data.success) {
-            createNotification({
-                text: data.response
-            });
-            return;
-        }
-
+    // Makes sure the user goes back to home page if already logged in
+    const succesModal = () => {
         // Creates a prompt that will take the user to the login page
         createModal({
             header: "Register",
@@ -78,12 +49,6 @@ export default function Register() {
             }]
         });
     }
-
-    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-        registerData.current = { ...registerData.current, [event.target.name]: event.target.value };
-    }
-
-    // Makes sure the user goes back to home page if already logged in
 
     return (
         <motion.div
@@ -101,7 +66,7 @@ export default function Register() {
                         <InputField onChange={handleChange} type="email" name="email" placeholder="Email" />
                         <InputField onChange={handleChange} type="password" name="password" placeholder="Password" />
                         <InputField onChange={handleChange} type="password" name="confirmPassword" placeholder="Confirm Password" />
-                        <ShineButton onClick={() => { register() }}>
+                        <ShineButton onClick={() => { register(registerData.current, succesModal) }}>
                             <p>Create Account</p>
                         </ShineButton>
                     </div>
@@ -109,5 +74,44 @@ export default function Register() {
             </div>
         </motion.div>
     );
+}
+
+const register = async (registerData: IDetailsToRegister, successModal: () => void) => {
+    // Client side checks
+    const [isValidData, validMessage] = isRegisterDataValid(registerData);
+
+    // Client side checks, checks on serverside anyway
+    if (!isValidData) {
+        createNotification({
+            text: validMessage,
+        });
+        return;
+    }
+
+    // Post to register
+    const [err, res] = await handlePromise<AxiosResponse<any, any>>(createUser(registerData));
+    if (err) {
+        // Server error prompt if it can't make the request
+        createModal({
+            header: "Register",
+            subtext: "Server is unavailable (CR)",
+            buttons: [{
+                text: "Ok",
+                fn: destroyModal,
+            }]
+        });
+        return;
+    }
+
+    const data = res?.data;
+    if (!data.success) {
+        createNotification({
+            text: data.response
+        });
+        return;
+    }
+
+    // Creates a prompt that will take the user to the login page
+    successModal();
 }
 
