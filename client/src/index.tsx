@@ -4,21 +4,25 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
 import store from './store'
-import onlineStatus from './onlineStatus';
-import preLogin from './preLogin';
+import onlineStatus from './scripts/onlineStatus';
+import preLogin from './scripts/preLogin';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
 );
 
-preLogin();
-onlineStatus();
+const init = async () => {
+    preLogin();
+    onlineStatus();
 
-root.render(
-    <Provider store={store}>
-        <App />
-    </Provider>
-);
+    root.render(
+        <Provider store={store}>
+            <App />
+        </Provider>
+    );
+}
+
+init();
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

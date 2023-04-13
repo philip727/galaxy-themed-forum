@@ -6,7 +6,7 @@ import { LoginData, RegisterData } from '../../types/users';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
-import { DEFAULT_COLUMNS, ORIGIN_URL, PROFILE_PICTURE_FOLDER } from '../../config';
+import { ACTION_LIMIT_TIME, DEFAULT_COLUMNS, ORIGIN_URL, PROFILE_PICTURE_FOLDER } from '../../config';
 import bcrypt from 'bcrypt'
 import { validateLoginData, validateRegisterData } from '../../validation/users';
 import handlePromise from '../../scripts/promiseHandler';
@@ -26,6 +26,7 @@ import {
 import { JWTError, QueryError } from '../../types/errors';
 import passport from '../../middleware/passport';
 import { IJWTPayload } from '../../types/auth';
+import actionLimiter from '../../scripts/actionLimiter';
 
 router.use(bodyParser.urlencoded({
     extended: true
@@ -140,6 +141,24 @@ router.get("/id/:id/comments", async (req, res) => {
 })
 
 router.post("/newcomment", passport, async (req, res) => {
+    // Makes sure there is a jwtpayload from the passport
+    if (!("jwtPayload" in req)) {
+        return res.send({
+            success: false,
+            response: "SERVER ERROR (PNC-JP)",
+        });
+    }
+
+    const jwtPayload = req.jwtPayload as IJWTPayload;
+    
+    if (!actionLimiter(jwtPayload.uid)) {
+        res.send({
+            success: false,
+            response: `Can only post a comment every ${ACTION_LIMIT_TIME} seconds`,
+        })
+        return;
+    }
+
     const regex = /^[0-9]+$/;
     let referer = req.headers.referer;
     if (!referer || typeof referer === "undefined") {
@@ -167,13 +186,6 @@ router.post("/newcomment", passport, async (req, res) => {
         });
     }
 
-    // Makes sure there is a jwtpayload from the passport
-    if (!("jwtPayload" in req)) {
-        return res.send({
-            success: false,
-            response: "SERVER ERROR (PNC-JP)",
-        });
-    }
 
     if (!("content" in req.body)) {
         return res.send({
@@ -182,7 +194,6 @@ router.post("/newcomment", passport, async (req, res) => {
         });
     }
 
-    const jwtPayload = req.jwtPayload as IJWTPayload;
     
     [err, result] = await handlePromise<string | QueryError>(createNewCommentOnProfile(profileId, jwtPayload.uid, req.body.content));
 

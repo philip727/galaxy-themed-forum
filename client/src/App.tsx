@@ -1,8 +1,5 @@
-import { useEffect } from 'react';
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom'
 import './App.scss'
-import { LOGIN_TOKEN_NAME } from './scripts/config';
-import { jwtLogin } from './scripts/auth/login';
 import RootLayout from './component/layout/RootLayout';
 import Home, { homeLoader } from './component/pages/Home';
 import Login from './component/pages/Login';

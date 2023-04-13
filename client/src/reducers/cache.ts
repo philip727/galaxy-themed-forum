@@ -16,6 +16,6 @@ const cacheSlice = createSlice({
     },
 });
 
-export const { updateCache: updateCache, clearCache: clearCache } = cacheSlice.actions; 
+export const { updateCache, clearCache } = cacheSlice.actions; 
 
 export default cacheSlice.reducer;

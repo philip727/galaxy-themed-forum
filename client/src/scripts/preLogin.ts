@@ -1,5 +1,5 @@
-import { jwtLogin } from "./scripts/auth/login";
-import { LOGIN_TOKEN_NAME } from "./scripts/config";
+import { jwtLogin } from "./auth/login";
+import { LOGIN_TOKEN_NAME } from "./config";
 
 export default function() {
     // Ensures the localstorage has a login token
