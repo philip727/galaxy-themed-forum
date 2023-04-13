@@ -10,7 +10,7 @@ const cacheSlice = createSlice({
             state.value = action.payload;
         },
 
-        clearCache: (state, _) => {
+        clearCache: (state) => {
             state.value = initialStateValue;
         }
     },

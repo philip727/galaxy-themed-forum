@@ -10,14 +10,14 @@ import UserContainer from "../../extras/UserContainer"
 import ShineButton from "../../inputs/ShineButton"
 
 type Props = {
-    userComments: { success: any, response: any }
+    retrievedComments: { success: any, response: any }
     profileId: string,
     addCommentCallback: (fn: () => void) => void,
 }
 
-export default function UserComments({ userComments, profileId, addCommentCallback }: Props) {
+export default function UserComments({ retrievedComments, profileId, addCommentCallback }: Props) {
     const user = useSelector((state: RootState) => state.user.value)
-    const [comments, setComments] = useState(userComments)
+    const [comments, setComments] = useState(retrievedComments)
 
     // Deletes the comment and also updates
     const handleDeleteComment = async (commentId: number) => {
@@ -26,18 +26,24 @@ export default function UserComments({ userComments, profileId, addCommentCallba
         setComments(await updateCommentsOnProfile(parseInt(profileId)));
     }
 
-    // Updates the comments on callback, this is used in the post comment component so we don't re-render too much
+    // Updates the comments on callback, this is used in the post comment component so we don't
     useEffect(() => {
         addCommentCallback(async () => {
-            setComments(await updateCommentsOnProfile(parseInt(profileId)));       
+            setComments(await updateCommentsOnProfile(parseInt(profileId)));
         })
     }, []);
 
+    // Sets the comments when retreieved comments change, this is so when we go to a new profile we change the comments :D
+    useEffect(() => {
+        setComments(retrievedComments);
+    }, [retrievedComments])
+
     return (
         <>
-            {userComments.success && (
+            {comments.success && (
                 <div className="w-full mt-2 flex flex-col-reverse">
-                    {comments.response.map((comment: any, index: any) => (
+                    {Array.isArray(comments.response) && typeof comments.response.map == "function" &&
+                    comments.response.map((comment: any, index: any) => (
                         <div key={index} className="w-full py-2 flex flex-row relative">
                             <img className="h-16 w-16 rounded-[50%] ml-2" src={getPfp(comment.pfpdestination)} />
                             <div className="pl-3 flex flex-col items-start justify-start">

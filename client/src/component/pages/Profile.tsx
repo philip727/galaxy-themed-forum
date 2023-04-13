@@ -39,7 +39,7 @@ export default function Profile() {
                     <div className="container w-[50rem] flex flex-col items-start px-3 pb-3">
                         <h1 className="mt-2 text-2xl font-bold">{userInfo.response.name}'s Comments</h1>
                         <PostComment callComments={callComments} />
-                        <UserComments userComments={userComments} profileId={params.id} addCommentCallback={addCommentCallback} />
+                        <UserComments retrievedComments={userComments} profileId={params.id} addCommentCallback={addCommentCallback} />
                     </div>
                 </>
             )}

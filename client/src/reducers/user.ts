@@ -12,7 +12,7 @@ const userSlice = createSlice({
             state.isAuthenticed = (action.payload.uid >= 0 && action.payload.username.length > 0);
         },
 
-        clearUser: (state, _) => {
+        clearUser: (state) => {
             state.value = initialStateValue;
             state.isAuthenticed = false;
         }

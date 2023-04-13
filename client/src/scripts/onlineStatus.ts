@@ -2,16 +2,15 @@ import { LOGIN_TOKEN_NAME, SERVER_URL } from './config';
 import socketIOClient from 'socket.io-client'
 import store, { RootState } from '../store'
 
+let socket: any = null;
+
 const checkOnlineStatus = (user: any) => {
     if (user.value.uid < 0 || user.value.username.length == 0 || !localStorage[LOGIN_TOKEN_NAME]) {
+        socket.emit('offline');
         return;
     }
 
-    // Updates the user online status when logged in
-    const socket = socketIOClient(SERVER_URL, { reconnectionAttempts: 5 });
-    socket.on('connect', () => {
-        socket.emit('online', localStorage[LOGIN_TOKEN_NAME]);
-    })
+    socket.emit('online', localStorage[LOGIN_TOKEN_NAME]);
 }
 
 const select = (state: RootState) => {
@@ -23,7 +22,11 @@ const listener = () => {
     checkOnlineStatus(user)
 }
 
-export default function() {
+export default async function() {
+    if (!socket) {
+        socket = socketIOClient(SERVER_URL, { reconnectionAttempts: 5 });
+    }
+
     store.subscribe(listener)
 }
 

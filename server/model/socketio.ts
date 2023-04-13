@@ -66,6 +66,7 @@ export class SocketIOServer {
             return;
         }
 
+
         const tempUserIndex = this.#tempUsers.indexOf(tempUserFromSocket);
         if (tempUserIndex <= -1) {
             return;
@@ -83,6 +84,7 @@ export class SocketIOServer {
             return;
         }
 
+
         this.onlineUsers.splice(userOnlineIndex, 1);
     }
 
@@ -98,6 +100,10 @@ export class SocketIOServer {
                 const userDetails = jwtDecode(jwt) as IJWTPayload;
 
                 this.pushUserOnline(userDetails, socket);
+            })
+
+            socket.on('offline', () => {
+                this.removeUser(socket);
             })
 
             socket.on("disconnect", () => {

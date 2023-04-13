@@ -1,0 +1,7 @@
+.dropdown {
+    &:hover {
+        &>p {
+            color: var(--blue-violet);
+        }
+    }
+}
