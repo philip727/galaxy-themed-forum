@@ -24,6 +24,7 @@ export const findCategory = (categoryId: number): Promise<Array<any> | QueryErro
         const [err, result] = await handlePromise<Array<any>>(
             db.query(`SELECT id, name, description, type FROM categories WHERE id = ${categoryId}`))
 
+
         if (err || !result) {
             return reject(QueryError.NULL);
         }
@@ -64,6 +65,6 @@ export const categoryExists = (id: number): Promise<string | QueryError> => {
             return reject(err);
         }
 
-        return resolve("User exists");
+        return resolve("Category exists");
     })
 }

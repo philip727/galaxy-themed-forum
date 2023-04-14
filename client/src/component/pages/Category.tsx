@@ -2,6 +2,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { json, Link, useLoaderData } from "react-router-dom"
 import { SERVER_URL } from "../../scripts/config";
+import { getPfp } from "../../scripts/layout/profile";
 import SectionHeader from "../extras/SectionHeader";
 import UserContainer from "../extras/UserContainer";
 import CreatePost from "./category/CreatePost";
@@ -31,7 +32,7 @@ export default function Category() {
                             transition={{ duration: 0.2 }}
                             className="container w-[40rem] py-2 pl-2 flex flex-row justify-start items-center cursor-pointer relative"
                         >
-                            <img className="h-12 w-12 rounded-full" src={`${SERVER_URL}${post.profile_pfp}`} />
+                            <img className="h-12 w-12 rounded-full" src={getPfp(post.profile_pfp)} />
                             <div className="ml-2">
                                 <p className="text-xl font-bold">{post.name}</p>
                                 <UserContainer user={{ uid: post.profile_id, name: post.profile_name, role: post.profile_role }} />

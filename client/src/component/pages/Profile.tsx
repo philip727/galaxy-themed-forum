@@ -33,7 +33,7 @@ export default function Profile() {
             className="flex flex-col justify-start items-center mt-20 gap-6"
         >
             <UserInfo userInfo={userInfo} />
-            {userInfo.success && (
+            {params.id && userInfo.success && (
                 <>
                     <Bio userInfo={userInfo} />
                     <div className="container w-[50rem] flex flex-col items-start px-3 pb-3">

@@ -28,7 +28,6 @@ export default function UserComments({ retrievedComments, profileId, addCommentC
 
     // Updates the comments on callback, this is used in the post comment component so we don't
     useEffect(() => {
-        console.log("hi")
         addCommentCallback(async () => {
             setComments(await updateCommentsOnProfile(parseInt(profileId)));
         })

@@ -72,7 +72,6 @@ const login = async (loginData: IDetailsToLogin) => {
     // Requests to login with the login data, will return a jwt so we can login on the client
     const [err, res] = await handlePromise<AxiosResponse<any, any>>(loginAsUser(loginData.username, loginData.password));
     if (err) {
-        console.log(err);
         return;
     }
 
