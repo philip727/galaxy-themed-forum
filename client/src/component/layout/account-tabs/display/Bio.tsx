@@ -6,6 +6,7 @@ import { setBio } from "../../../../scripts/api/account";
 import { createNotification } from "../../../../scripts/layout/notificationManager";
 import handlePromise from "../../../../scripts/promiseHandler";
 import store, { RootState } from "../../../../store";
+import InputArea from "../../../inputs/InputArea";
 import ShineButton from "../../../inputs/ShineButton";
 
 export default function Bio() {
@@ -31,12 +32,13 @@ export default function Bio() {
 
     return (
         <>
-            <textarea
-                name="bio"
+            <InputArea
                 onChange={handleTextChange}
+                name="bio"
                 maxLength={200}
                 placeholder="Enter Bio..."
-                className="mt-6 w-full h-40 min-h-[10rem] pl-1 mb-3 inset-shadow bg-[var(--dark-jet)] resize-none"
+                className="mt-6 w-full !h-40 min-h-[10rem] mb-3"
+                areaClassName="!px-3 pt-2"
                 defaultValue={user.bio}
             />
             <div className="w-full flex flex-row justify-end">

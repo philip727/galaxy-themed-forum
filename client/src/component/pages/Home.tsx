@@ -37,7 +37,7 @@ export const homeLoader = async () => {
 
 const fetchGeneralCategories = () => {
     return axios.request({
-        url: "/api/categories/general",
+        url: "/api/categories/type/general",
         method: "GET",
     })
 }

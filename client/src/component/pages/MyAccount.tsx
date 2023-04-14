@@ -20,7 +20,7 @@ export default function MyAccount() {
             transition={{ duration: 0.3 }}
             className="flex flex-col justify-start items-center mt-20 gap-6"
         >
-            <SectionHeader widthClass="w-[50rem]" headerText="Account Settings" />
+            <SectionHeader className="w-[50rem]" headerText="Account Settings" />
             <div className="container w-[50rem] flex flex-row items-start justify-start py-3 pl-3">
                 <div className="h-full bg-[var(--night)] outset-shadow w-1/4 flex flex-col justify-start items-center">
                     {Object.keys(tabs).map((key, i) => (

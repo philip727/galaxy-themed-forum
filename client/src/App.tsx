@@ -4,10 +4,11 @@ import RootLayout from './component/layout/RootLayout';
 import Home, { homeLoader } from './component/pages/Home';
 import Login from './component/pages/Login';
 import Register from './component/pages/Register';
-import Category from './component/pages/Category';
+import Category, { categoryLoader } from './component/pages/Category';
 import { PrivateWrapper, UnAuthorizedWrapper } from './component/Wrappers';
 import Profile, { profileLoader } from './component/pages/Profile';
 import MyAccount from './component/pages/MyAccount';
+import Post from './component/pages/Post';
 
 function App() {
     return (
@@ -23,9 +24,13 @@ function App() {
                         </Route>
 
                         <Route path="/category">
-                            <Route path=":id" element={<Category />} />
+                            <Route path=":id" element={<Category />} loader={categoryLoader}>
+                            </Route>
                         </Route>
 
+                        <Route path="/post">
+                            <Route path=":id" element={<Post />} />
+                        </Route>
                         <Route path="/profile">
                             <Route path=":id" element={<Profile />} loader={profileLoader} />
                         </Route>

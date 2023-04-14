@@ -18,7 +18,7 @@ export default function UserContainer({ user, className }: Props) {
     }
 
     return (
-        <Link to={`/profile/${user.uid}`}>
+        <Link to={`/profile/${user.uid}`} className="w-fit block">
             <p className={`${determineClass()} mt-0 ${className}`}>{user.name}</p>
         </Link>
     )
