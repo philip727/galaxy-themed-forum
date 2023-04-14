@@ -43,7 +43,7 @@ export default function Bio() {
             />
             <div className="w-full flex flex-row justify-end">
                 <ShineButton onClick={() => updateBio(userPersonalInfo.current.bio)}>
-                    <p className="font-bold text-xl">Update</p>
+                    <p className="text-xl font-medium">Update Bio</p>
                 </ShineButton>
             </div>
         </>

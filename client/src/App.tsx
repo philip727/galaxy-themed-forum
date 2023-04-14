@@ -8,7 +8,7 @@ import Category, { categoryLoader } from './component/pages/Category';
 import { PrivateWrapper, UnAuthorizedWrapper } from './component/Wrappers';
 import Profile, { profileLoader } from './component/pages/Profile';
 import MyAccount from './component/pages/MyAccount';
-import Post from './component/pages/Post';
+import Post, { postLoader } from './component/pages/Post';
 
 function App() {
     return (
@@ -29,7 +29,7 @@ function App() {
                         </Route>
 
                         <Route path="/post">
-                            <Route path=":id" element={<Post />} />
+                            <Route path=":id" element={<Post />} loader={postLoader} />
                         </Route>
                         <Route path="/profile">
                             <Route path=":id" element={<Profile />} loader={profileLoader} />

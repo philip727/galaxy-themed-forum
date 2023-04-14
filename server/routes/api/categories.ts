@@ -1,7 +1,7 @@
 import express from 'express';
 import handlePromise from '../../scripts/promiseHandler';
 import { QueryError } from '../../types/errors';
-import { findCategoriesByType, findCategoryById, findPostsInCategory } from '../../scripts/categories';
+import { findCategoriesByType, findCategory, findPostsInCategory } from '../../scripts/categories';
 import { findUser } from '../../scripts/users';
 import { DEFAULT_COLUMNS } from '../../config';
 const router = express.Router();
@@ -50,7 +50,7 @@ router.get("/id/:id", async (req, res) => {
         });
     }
 
-    const [err, result] = await handlePromise<Array<any> | QueryError>(findCategoryById(parseInt(req.params.id)));
+    const [err, result] = await handlePromise<Array<any> | QueryError>(findCategory(parseInt(req.params.id)));
     if (err) {
         if (err === QueryError.NORESULT) {
             return res.send({

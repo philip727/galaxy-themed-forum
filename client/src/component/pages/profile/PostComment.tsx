@@ -60,7 +60,7 @@ export default function PostComment({ callComments }: Props) {
             {isAutenticated && (
                 <>
                     <InputArea 
-                        ref={textArea} 
+                        reference={textArea} 
                         onChange={handlePostCommentChange} 
                         name="bio" 
                         maxLength={120} 

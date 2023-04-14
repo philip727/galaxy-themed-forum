@@ -19,7 +19,7 @@ export const findPostsInCategory = (categoryId: number): Promise<Array<any> | Qu
     })
 }
 
-export const findCategoryById = (categoryId: number): Promise<Array<any> | QueryError> => {
+export const findCategory = (categoryId: number): Promise<Array<any> | QueryError> => {
     return new Promise(async (resolve, reject) => {
         const [err, result] = await handlePromise<Array<any>>(
             db.query(`SELECT id, name, description, type FROM categories WHERE id = ${categoryId}`))
@@ -54,5 +54,16 @@ export const findCategoriesByType = (categoryType: string): Promise<Array<any> |
         }
 
         return resolve(result);
+    })
+}
+
+export const categoryExists = (id: number): Promise<string | QueryError> => {
+    return new Promise(async (resolve, reject) => {
+        const [err] = await handlePromise<Array<any> | QueryError>(findCategory(id));
+        if (err) {
+            return reject(err);
+        }
+
+        return resolve("User exists");
     })
 }
