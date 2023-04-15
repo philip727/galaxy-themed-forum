@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom"
+import { CategoryInfo } from "../../../types/category"
+import { ServerResponse } from "../../../types/response"
 import CategoryContainer from "../../extras/CategoryContainer"
 import SectionHeader from "../../extras/SectionHeader"
 import './Categories.scss'
 
 type Props = {
-    categories: any,
+    categories: ServerResponse<CategoryInfo[]>,
 }
 
 export default function Categories({ categories }: Props) {
@@ -15,7 +17,7 @@ export default function Categories({ categories }: Props) {
                 <>
                     {categories.response.map((category: any, index: any) => (
                         <Link key={index} to={`/category/${category.id}`}>
-                            <CategoryContainer name={category.name} description={category.description} categoryId={category.CID} />
+                            <CategoryContainer name={category.name} description={category.description} />
                         </Link>
                     ))}
                 </>

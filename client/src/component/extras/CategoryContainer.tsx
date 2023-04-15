@@ -3,10 +3,9 @@ import './CategoryContainer.scss'
 type Props = {
     name: string,
     description: string,
-    categoryId: number,
 }
 
-export default function CategoryContainer({ name, description, categoryId }: Props) {
+export default function CategoryContainer({ name, description }: Props) {
     return (
         <div className="container w-[30rem] category">
             <div className="flex flex-col justify-start items-center pb-1">

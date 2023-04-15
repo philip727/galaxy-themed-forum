@@ -6,18 +6,29 @@ import { createNotification } from '../../../scripts/layout/notificationManager'
 import { formatDate, getPfp } from '../../../scripts/layout/profile'
 import handlePromise from '../../../scripts/promiseHandler'
 import { RootState } from '../../../store'
+import { ServerResponse } from '../../../types/response'
 import UserContainer from '../../extras/UserContainer'
 import ShineButton from '../../inputs/ShineButton'
 
 type Props = {
-    retrievedComments: any
+    retrievedComments: ServerResponse<PostCommentInfo>
     postId: number,
     addCommentCallback: (fn: () => void) => void,
 }
 
+type PostCommentInfo = {
+    content: string,
+    id: number,
+    pfpdestination: string | null,
+    post_date: string,
+    poster_id: number,
+    poster_name: string,
+    poster_role: string,
+}
+
 export default function UserComments({ retrievedComments, postId, addCommentCallback }: Props) {
     const user = useSelector((state: RootState) => state.user.value)
-    const [comments, setComments] = useState(retrievedComments)
+    const [comments, setComments] = useState<ServerResponse<PostCommentInfo | null>>(retrievedComments)
 
     // Deletes the comment and also updates
     const handleDeleteComment = async (commentId: number) => {
@@ -28,9 +39,9 @@ export default function UserComments({ retrievedComments, postId, addCommentCall
 
     // Updates the comments on callback, this is used in the post comment component so we don't
     useEffect(() => {
-       addCommentCallback(async () => {
-           setComments(await updateCommentsOnPost(postId));
-       })
+        addCommentCallback(async () => {
+            setComments(await updateCommentsOnPost(postId));
+        })
     }, []);
 
     // Sets the comments when retreieved comments change, this is so when we go to a new profile we change the comments :D
@@ -70,25 +81,25 @@ export default function UserComments({ retrievedComments, postId, addCommentCall
     )
 }
 
-const updateCommentsOnPost = async (postId: number): Promise<{ success: false, response: Array<any> }> => {
+const updateCommentsOnPost = async (postId: number): Promise<ServerResponse<PostCommentInfo | null>> => {
     const [err, result] = await handlePromise<AxiosResponse<any, any>>(getPostComments(postId));
 
     if (err) {
         createNotification({
             text: err.data.response,
         })
-        return { success: false, response: [] };
+        return { success: false, response: null };
     }
 
     if (!result) {
         createNotification({
             text: "SERVER ERROR (C-DGCU)",
         })
-        return { success: false, response: [] };
+        return { success: false, response: null };
     }
 
     if (!result.data.success) {
-        return { success: false, response: [] };
+        return { success: false, response: null };
     }
 
     return result.data;

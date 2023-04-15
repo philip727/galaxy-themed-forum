@@ -1,5 +1,16 @@
+import { ServerResponse } from "../../../types/response";
+
 type Props = {
-    userInfo: { success: any, response: any }
+    userInfo: ServerResponse<RetrievedData> 
+}
+
+type RetrievedData = {
+    bio: string,
+    name: string,
+    pfpdestination: string,
+    regdate: string,
+    role: string,
+    uid: number
 }
 
 export default function Bio({ userInfo }: Props) {

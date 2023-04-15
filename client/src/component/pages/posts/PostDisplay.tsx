@@ -6,11 +6,24 @@ import { createNotification } from '../../../scripts/layout/notificationManager'
 import { formatDate, getPfp } from '../../../scripts/layout/profile'
 import handlePromise from '../../../scripts/promiseHandler'
 import { RootState } from '../../../store'
+import { ServerResponse } from '../../../types/response'
 import UserContainer from '../../extras/UserContainer'
 import ShineButton from '../../inputs/ShineButton'
 
 type Props = {
-    postData: any
+    postData: ServerResponse<PostDisplayDetails>
+}
+
+type PostDisplayDetails = {
+    category_id: number,
+    content: string,
+    id: number,
+    name: string,
+    postdate: string,
+    profile_id: number,
+    profile_name: string,
+    profile_pfp: string,
+    profile_role: string,
 }
 
 export default function PostDisplay({ postData }: Props) {

@@ -1,14 +1,40 @@
+import { AxiosResponse } from "axios";
 import { motion } from "framer-motion";
 import { json, useLoaderData, useParams } from "react-router-dom";
 import { getUserByUID, getUserComments } from "../../scripts/api/users";
+import { ServerResponse } from "../../types/response";
 import Bio from "./profile/Bio";
 import PostComment from "./profile/PostComment";
 import UserComments from "./profile/UserComments";
 import UserInfo from "./profile/UserInfo";
 
+type UserInfo = {
+    bio: string,
+    name: string,
+    pfpdestination: string,
+    regdate: string,
+    role: string,
+    uid: number
+}
+
+type CommentInfo = {
+    content: string,
+    id: number,
+    pfpdestination: string | null,
+    post_date: string,
+    poster_id: number,
+    poster_name: string,
+    poster_role: string,
+}
+
+type ProfileLoaderData = {
+    userInfo: AxiosResponse<ServerResponse<UserInfo>>,
+    userComments: AxiosResponse<ServerResponse<CommentInfo[]>>,
+}
+
 export default function Profile() {
-    const loaderData: any = useLoaderData();
-    const params = useParams() as any;
+    const loaderData = useLoaderData() as ProfileLoaderData;
+    const params = useParams();
     const userInfo = loaderData.userInfo.data;
     const userComments = loaderData.userComments.data;
     const commentCallbacks: Array<() => void> = []

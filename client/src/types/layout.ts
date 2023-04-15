@@ -1,5 +1,5 @@
 import { ServerResponse } from "./response";
-import { IPublicRegisterDetails, IPublicUserDetails } from "./user";
+import { IPublicUserDetails, IPublicUserDisplay } from "./user";
 
 export type ModalDetails = {
     header: string,
@@ -21,7 +21,7 @@ export interface INotificationDetailsWithID extends INotificationDetails {
 }
 
 export interface ICategoryDetails {
-    CID: number,
+    id: number,
     name: string,
     description: string,
 }
@@ -29,7 +29,7 @@ export interface ICategoryDetails {
 
 export interface IHomeLoader {
     categories: ServerResponse<ICategoryDetails[]>;
-    lastUser: ServerResponse<IPublicRegisterDetails>; 
+    lastUser: ServerResponse<IPublicUserDisplay>; 
     onlineUsers: ServerResponse<IPublicUserDetails[]>; 
 }
 

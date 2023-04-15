@@ -18,7 +18,6 @@ export default function ShineButton({ children, onClick, className }: Props) {
         }
     }
 
-
     return (
         <motion.div
             variants={buttonAnimations}

@@ -1,14 +1,43 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { motion } from 'framer-motion';
 import { json, useLoaderData, useParams } from 'react-router-dom'
 import { getPostComments } from '../../scripts/api/posts';
+import { ServerResponse } from '../../types/response';
 import PostComment from './posts/PostComment';
 import PostDisplay from './posts/PostDisplay';
 import UserComments from './posts/UserComments';
 
+type CommentsData = {
+    content: string,
+    id: number,
+    pfpdestination: null | string,
+    post_date: string,
+    poster_id: number,
+    poster_name: string,
+    poster_role: string,
+}
+
+type CategoryInfo = {
+    category_id: number,
+    content: string,
+    id: number,
+    name: string,
+    postdate: string,
+    profile_id: number,
+    profile_name: string,
+    profile_pfp: string,
+    profile_role: string,
+}
+
+type PostLoaderData = {
+    postComments: AxiosResponse<ServerResponse<CommentsData>>
+    postInfo: AxiosResponse<ServerResponse<CategoryInfo>>
+}
+
+
 export default function Post() {
     const params = useParams();
-    const loaderData = useLoaderData() as any;
+    const loaderData = useLoaderData() as PostLoaderData;
     const commentsData = loaderData.postComments.data;
     const postData = loaderData.postInfo.data;
 

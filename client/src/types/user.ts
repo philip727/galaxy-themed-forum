@@ -9,10 +9,6 @@ export interface IPublicUserDetails {
     role: string,
 }
 
-export interface IPublicRegisterDetails extends IPublicUserDetails {
-    regdate: string,
-}
-
 export interface IDetailsToRegister extends IUserDetails {
     password: string,
     confirmPassword: string,
@@ -28,3 +24,7 @@ export interface IUserReducerAction {
     type: string,
 }
 
+export interface IPublicUserDisplay extends IPublicUserDetails {
+    regdate: string,
+    pfpdestination: string | null,
+}

@@ -1,14 +1,36 @@
-import axios from "axios";
+import axios, { Axios, AxiosResponse } from "axios";
 import { motion } from "framer-motion";
 import { json, Link, useLoaderData } from "react-router-dom"
-import { SERVER_URL } from "../../scripts/config";
 import { getPfp } from "../../scripts/layout/profile";
+import { ServerResponse } from "../../types/response";
 import SectionHeader from "../extras/SectionHeader";
 import UserContainer from "../extras/UserContainer";
 import CreatePost from "./category/CreatePost";
 
+
+type PostsInfo = {
+    id: number,
+    name: string,
+    profile_id: number,
+    profile_name: string,
+    profile_pfp: string,
+    profile_role: string,
+}
+
+type CategoryInfo = {
+    id: number,
+    name: string,
+    description: string,
+    type: string,
+}
+
+type CategoryLoaderData = {
+    posts: AxiosResponse<ServerResponse<PostsInfo>>,
+    info: AxiosResponse<ServerResponse<CategoryInfo>>,
+}
+
 export default function Category() {
-    const loaderData = useLoaderData() as any;
+    const loaderData = useLoaderData() as CategoryLoaderData;
     const postsData = loaderData.posts.data;
     const infoData = loaderData.info.data;
 
