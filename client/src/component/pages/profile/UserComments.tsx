@@ -16,7 +16,7 @@ type Props = {
     addCommentCallback: (fn: () => void) => void,
 }
 
-type UserCommentInfo = {
+export type UserCommentInfo = {
     content: string,
     id: number,
     pfpdestination: string,

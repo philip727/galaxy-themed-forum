@@ -5,7 +5,7 @@ import { getUserByUID, getUserComments } from "../../scripts/api/users";
 import { ServerResponse } from "../../types/response";
 import Bio from "./profile/Bio";
 import PostComment from "./profile/PostComment";
-import UserComments from "./profile/UserComments";
+import UserComments, { UserCommentInfo } from "./profile/UserComments";
 import UserInfo from "./profile/UserInfo";
 
 type UserInfo = {
@@ -17,19 +17,9 @@ type UserInfo = {
     uid: number
 }
 
-type CommentInfo = {
-    content: string,
-    id: number,
-    pfpdestination: string | null,
-    post_date: string,
-    poster_id: number,
-    poster_name: string,
-    poster_role: string,
-}
-
 type ProfileLoaderData = {
     userInfo: AxiosResponse<ServerResponse<UserInfo>>,
-    userComments: AxiosResponse<ServerResponse<CommentInfo[]>>,
+    userComments: AxiosResponse<ServerResponse<UserCommentInfo[]>>,
 }
 
 export default function Profile() {
